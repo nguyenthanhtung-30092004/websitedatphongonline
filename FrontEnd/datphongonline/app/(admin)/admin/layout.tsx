@@ -13,6 +13,7 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   BellOutlined,
+  CalendarOutlined,
 } from "@ant-design/icons";
 import { Modal, Tooltip, Avatar } from "antd";
 import { useAuths } from "@/hooks/useAuths";
@@ -39,6 +40,11 @@ const menu = [
     label: "Quản lý phòng",
     href: "/admin/rooms",
     icon: <HomeOutlined />,
+  },
+  {
+    label: "Quản lý đơn hàng",
+    href: "/admin/bookings",
+    icon: <CalendarOutlined />,
   },
   {
     label: "Quản lý người dùng",

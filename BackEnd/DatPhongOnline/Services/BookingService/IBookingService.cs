@@ -1,5 +1,6 @@
 ﻿using DatPhongOnline.Data.Entities;
 using DatPhongOnline.Dtos.Booking;
+using DatPhongOnline.Dtos.Room;
 
 namespace DatPhongOnline.Services.BookingService
 {
@@ -11,6 +12,8 @@ namespace DatPhongOnline.Services.BookingService
         Task<List<BookingDto>> GetAllBookAsync();
         Task<BookingDto> GetBookingByIdAsync(int bookingId);
         Task<List<BookingDto>> GetUserBookingsAsync(int userId);
+
+        Task<List<RoomDto>> SearchRoomsAsync(SearchRoomDto dto);
     }
 
 }

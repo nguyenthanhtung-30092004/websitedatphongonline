@@ -4,6 +4,8 @@ namespace DatPhongOnline.Services
 {
     public interface IAuthService
     {
+
+        // Admin
         Task<UserDto> GetCurrentUserAsync(string token);
         Task<UserDto?> GetByIdAsync(int id);
         Task<UserDto?> GetByEmailAsync(string email);
@@ -13,7 +15,7 @@ namespace DatPhongOnline.Services
         Task<bool> DeactivateAsync(int id);
         Task<List<UserDto>> GetFilteredAsync(FilterUserDto filter);
 
-
+        //User
         Task<User> RegisterAsync(RegisterRequestDto registerRequestDto);
         Task<AuthResponseDto> LoginAsync(LoginRequestDto dto);
         Task<bool> ForgotPasswordAsync(string email);

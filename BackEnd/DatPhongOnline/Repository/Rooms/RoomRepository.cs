@@ -1,5 +1,7 @@
 ﻿using DatPhongOnline.Data;
 using DatPhongOnline.Data.Entities;
+using DatPhongOnline.Dtos.Booking;
+using DatPhongOnline.Dtos.Room;
 using Microsoft.EntityFrameworkCore;
 using System.Runtime.CompilerServices;
 
@@ -25,6 +27,7 @@ namespace DatPhongOnline.Repository.Rooms
         public async Task<Room?> GetByIdAsync(int id)
         {
             return await _context.Rooms
+                .Include(r => r.RoomType)
                 .Include(r => r.RoomImages)
                 .Include(r => r.RoomAmenities)
                 .ThenInclude(ra => ra.Amenity)

@@ -20,18 +20,21 @@ export default function Hero() {
             Đặt phòng nhanh chóng – tiện lợi – minh bạch với hệ thống quản lý
             hiện đại.
           </p>
-
-          <SearchBox />
         </div>
 
         {/* Image */}
-        <div className="rounded-3xl overflow-hidden shadow-xl hover:scale-105 transition-all duration-300">
+        <div className="rounded-3xl overflow-hidden shadow-xl">
           <img
             src="/banner.png"
             alt="Room"
             className="w-full h-full object-cover"
           />
         </div>
+      </div>
+
+      {/* Search box */}
+      <div className="max-w-5xl mx-auto px-6 -mt-10 pb-16">
+        <SearchBox />
       </div>
     </section>
   );

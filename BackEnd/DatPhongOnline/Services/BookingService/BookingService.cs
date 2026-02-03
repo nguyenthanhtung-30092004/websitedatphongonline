@@ -1,6 +1,7 @@
 ﻿using DatPhongOnline.Data;
 using DatPhongOnline.Data.Entities;
 using DatPhongOnline.Dtos.Booking;
+using DatPhongOnline.Dtos.Room;
 using DatPhongOnline.Repository.Bookings;
 using DatPhongOnline.Repository.Rooms;
 using Microsoft.EntityFrameworkCore;
@@ -34,13 +35,15 @@ namespace DatPhongOnline.Services.BookingService
                 TotalPrice = b.TotalPrice,
                 Status = b.Status,
                 BookingDetails = b.BookingDetails
-    .Select(d => new BookingDetailDto
-    {
-        RoomId = d.RoomId,
-        PricePerNight = d.PricePerNight
-    })
-    .ToList()
-
+                    .Select(d => new BookingDetailDto
+                    {
+                        RoomId = d.RoomId,
+                        RoomName = d.Room.RoomName,
+                        Address = d.Room.Address,
+                        BasePrice = d.Room.BasePrice,
+                        PricePerNight = d.PricePerNight
+                    })
+                    .ToList()
             }).ToList();
         }
 
@@ -71,13 +74,15 @@ namespace DatPhongOnline.Services.BookingService
                 TotalPrice = b.TotalPrice,
                 Status = b.Status,
                 BookingDetails = b.BookingDetails
-    .Select(d => new BookingDetailDto
-    {
-        RoomId = d.RoomId,
-        PricePerNight = d.PricePerNight
-    })
-    .ToList()
-
+                    .Select(d => new BookingDetailDto
+                    {
+                        RoomId = d.RoomId,
+                        RoomName = d.Room.RoomName,
+                        Address = d.Room.Address,
+                        BasePrice = d.Room.BasePrice,
+                        PricePerNight = d.PricePerNight
+                    })
+                    .ToList()
             }).ToList();
         }
 
@@ -100,16 +105,17 @@ namespace DatPhongOnline.Services.BookingService
                 TotalPrice = booking.TotalPrice,
                 Status = booking.Status,
                 BookingDetails = booking.BookingDetails
-    .Select(d => new BookingDetailDto
-    {
-        RoomId = d.RoomId,
-        PricePerNight = d.PricePerNight
-    })
-    .ToList()
-
+                    .Select(d => new BookingDetailDto
+                    {
+                        RoomId = d.RoomId,
+                        RoomName = d.Room.RoomName,
+                        Address = d.Room.Address,
+                        BasePrice = d.Room.BasePrice,
+                        PricePerNight = d.PricePerNight
+                    })
+                    .ToList()
             };
         }
-
 
         public async Task<BookingDto> CreateBookingAsync(int userId, CreateBookingDto dto)
         {
@@ -120,6 +126,10 @@ namespace DatPhongOnline.Services.BookingService
             if (totalDays <= 0)
                 throw new Exception("Ngày check-out phải sau check-in");
 
+            int totalGuests = dto.Adults + dto.Children;
+            if (totalGuests <= 0)
+                throw new Exception("Phải có ít nhất một khách");
+
             var bookingDetails = new List<BookingDetail>();
             decimal totalPrice = 0;
 
@@ -128,6 +138,12 @@ namespace DatPhongOnline.Services.BookingService
                 var room = await _roomRepo.GetByIdAsync(roomId);
                 if (room == null)
                     throw new Exception($"Phòng {roomId} không tồn tại");
+
+                if (room.RoomType == null)
+                    throw new Exception($"Loại phòng của phòng {room.RoomName} không được cấu hình");
+
+                if (totalGuests > room.RoomType.MaxGuests)
+                    throw new Exception($"Phòng {room.RoomName} chỉ chứa tối đa {room.RoomType.MaxGuests} khách, nhưng bạn có {totalGuests} khách");
 
                 var isAvailable = await _repo.IsRoomAvailableAsync(roomId, dto.CheckInDate, dto.CheckOutDate);
                 if (!isAvailable)
@@ -173,11 +189,13 @@ namespace DatPhongOnline.Services.BookingService
                     .Select(d => new BookingDetailDto
                     {
                         RoomId = d.RoomId,
+                        RoomName = d.Room.RoomName,
+                        Address = d.Room.Address,
+                        BasePrice = d.Room.BasePrice,
                         PricePerNight = d.PricePerNight
                     })
                     .ToList()
             };
-
         }
 
         public async Task CancelBooking(int bookingId, int userId)
@@ -195,5 +213,25 @@ namespace DatPhongOnline.Services.BookingService
             booking.Status = BookingStatus.Canceled;
             await _repo.SaveChangeAsync();
         }
+
+            public async Task<List<RoomDto>> SearchRoomsAsync(SearchRoomDto dto)
+            {
+                if (dto.CheckOut <= dto.CheckIn)
+                    throw new Exception("Ngày checkout phải sau check-in");
+
+                int totalGuest = dto.Adults + dto.Children;
+                var rooms = await _repo.SearchAsync(
+                    dto.CheckIn, dto.CheckOut, dto.Adults, dto.Children);
+                return rooms.Select(r => new RoomDto
+                {
+                    Id = r.Id,
+                    RoomName = r.RoomName,
+                    Address = r.Address,
+                    BasePrice = r.BasePrice,
+                    RoomTypeId = r.RoomTypeId,
+                    ImageUrls = r.RoomImages.Select(i => i.ImageUrl).ToList(),
+                    Amenities = r.RoomAmenities.Select(a => a.Amenity.Name).ToList()
+                }).ToList();
+            }
     }
 }

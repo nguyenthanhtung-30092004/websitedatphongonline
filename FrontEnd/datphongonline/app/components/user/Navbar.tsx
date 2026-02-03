@@ -31,6 +31,11 @@ export default function Navbar() {
       label: "Thông tin cá nhân",
       onClick: () => router.push("/profile"),
     },
+    {
+      key: "bookings",
+      label: "Đơn đặt phòng của tôi",
+      onClick: () => router.push("/my-bookings"),
+    },
     { type: "divider" as const },
     {
       key: "logout",
@@ -57,7 +62,7 @@ export default function Navbar() {
             </Link>
 
             {user && (
-              <Link href="/bookings" className="hover:text-[#b8955a]">
+              <Link href="/my-bookings" className="hover:text-[#b8955a]">
                 Đơn đặt
               </Link>
             )}

@@ -22,11 +22,11 @@ namespace DatPhongOnline.Helpers
         {
             var claims = new[]
             {
-                    new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new Claim(ClaimTypes.Role, role)
-                };
-
+                new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.Role, role)
+            };
+            
             var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_config["JWT:Key"])
             );

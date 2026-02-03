@@ -8,7 +8,7 @@ namespace DatPhongOnline.Dtos.Booking
         public DateTime CheckOutDate { get; set; }
         public int Adults { get; set; }
         public int Children { get; set; }
-        public List<int> RoomIds { get; set; }
+        public List<int>? RoomIds { get; set; }
 
     }
 }

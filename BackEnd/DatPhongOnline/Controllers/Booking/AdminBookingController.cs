@@ -30,6 +30,32 @@ namespace DatPhongOnline.Controllers.Booking
                 return BadRequest(new { message = ex.Message });
             }
         }
+        [HttpPatch("{id}/pending")]
+        public async Task<IActionResult> Pending(int id)
+        {
+            try
+            {
+                await _service.AdminUpdateStatusAsync(id, Data.Entities.BookingStatus.Pending);
+                return Ok(new { message = "Chờ xác nhận đặt phòng" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+        [HttpPatch("{id}/cancel")]
+        public async Task<IActionResult> Cancel(int id)
+        {
+            try
+            {
+                await _service.AdminUpdateStatusAsync(id, Data.Entities.BookingStatus.Canceled);
+                return Ok(new { message = "Hủy đặt phòng thành công" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
 
         [HttpPatch("{id}/confirm")]
         public async Task<IActionResult> Confirm(int id)

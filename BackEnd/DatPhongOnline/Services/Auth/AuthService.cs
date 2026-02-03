@@ -121,7 +121,7 @@ namespace DatPhongOnline.Services.Auth
         public async Task<User> RegisterAsync(RegisterRequestDto dto)
         {
             var userCheck = await _userRepo.ExistsByEmailAsync(dto.Email);
-            if (userCheck != null)
+            if (userCheck != false)
             {
                 throw new BadHttpRequestException("Email already exists!");
             }
@@ -183,6 +183,9 @@ namespace DatPhongOnline.Services.Auth
                 IsLocked = user.IsLocked,
             };
         }
+
+
+        // Cả admin và user
 
         public async Task<bool> ForgotPasswordAsync(string email)
         {

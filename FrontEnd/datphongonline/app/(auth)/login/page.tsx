@@ -57,9 +57,23 @@ export default function LoginPage() {
       const user = await fetchUser();
 
       router.push(user?.role === "Admin" ? "/admin/dashboard" : "/");
-    } catch (err) {
-      setError("Đăng nhập Google thất bại");
-      setGoogleLoading(false); // chỉ reset khi fail
+    } catch (err: any) {
+      let message = "Đăng nhập thất bại. Vui lòng thử lại.";
+
+      if (err.response) {
+        const status = err.response.status;
+        const backendMessage = err.response.data?.message;
+
+        if (status === 403 || status === 423) {
+          message = backendMessage || "Tài khoản của bạn đã bị khóa";
+        } else {
+          message = backendMessage || "Email hoặc mật khẩu không đúng";
+        }
+      } else if (err.request) {
+        message = "Không thể kết nối đến máy chủ. Vui lòng thử lại sau.";
+      }
+
+      setError(message);
     }
   };
 
@@ -142,16 +156,16 @@ export default function LoginPage() {
             {loading ? "Đang đăng nhập..." : "Đăng nhập"}
           </button>
           {/* GOOGLE LOGIN */}
-          <div className="w-full flex justify-center">
-            <GoogleLogin
-              onSuccess={(credentialResponse) => {
-                console.log(credentialResponse);
-              }}
-              onError={() => {
-                console.log("Login Failed");
-              }}
-            />
-          </div>
+          <GoogleLogin
+            onSuccess={(credentialResponse) => {
+              if (credentialResponse.credential) {
+                handleGoogleLogin(credentialResponse.credential);
+              }
+            }}
+            onError={() => {
+              setError("Đăng nhập Google thất bại");
+            }}
+          />
 
           {/* DIVIDER */}
           <div className="flex items-center gap-3 my-5">

@@ -30,13 +30,48 @@ namespace DatPhongOnline.Repository.Bookings
                 .ToListAsync();
         }
 
-        public async Task<bool> IsRoomAvailableAsync(int roomId, DateTime checkIn, DateTime checkOut)
+        public async Task<bool> IsRoomAvailableAsync(
+            int roomId,
+            DateTime checkIn,
+            DateTime checkOut)
         {
             return !await _context.BookingDetails
-                .AnyAsync(bd => bd.RoomId == roomId
-                && bd.Booking.Status != BookingStatus.Canceled
-                && checkIn < bd.Booking.CheckOutDate
-                && checkOut > bd.Booking.CheckInDate);
+                .AnyAsync(d =>
+                    d.RoomId == roomId &&
+                    d.Booking.Status != BookingStatus.Canceled &&
+                    checkIn < d.Booking.CheckOutDate &&
+                    checkOut > d.Booking.CheckInDate
+                );
+        }
+
+        public async Task<List<Room>> SearchAvailableRoomsAsync(
+                DateTime checkIn,
+                DateTime checkOut,
+                int numberOfGuests,
+                int? roomTypeId = null)
+        {
+            var query = _context.Rooms
+                .Include(r => r.RoomType)
+                .Where(r =>
+                    r.Status == "Available" &&
+                    r.RoomType.MaxGuests >= numberOfGuests
+                );
+
+            if (roomTypeId.HasValue)
+            {
+                query = query.Where(r => r.RoomTypeId == roomTypeId.Value);
+            }
+
+            query = query.Where(r =>
+                !_context.BookingDetails.Any(d =>
+                    d.RoomId == r.Id &&
+                    d.Booking.Status != BookingStatus.Canceled &&
+                    checkIn < d.Booking.CheckOutDate &&
+                    checkOut > d.Booking.CheckInDate
+                )
+            );
+
+            return await query.ToListAsync();
         }
 
         public async Task AddBookingAsync(Booking booking)
@@ -49,15 +84,37 @@ namespace DatPhongOnline.Repository.Bookings
             await _context.BookingDetails.AddAsync(bookingDetail);
         }
 
-        public async Task<Booking?> GetBookingByIdAsync(int id)
+        public async Task<Booking?> GetBookingByIdAsync(int bookingId)
         {
             return await _context.Bookings
-                .FirstOrDefaultAsync(b => b.Id == id);
+                .Include(b => b.BookingDetails)
+                    .ThenInclude(d => d.Room)
+                .FirstOrDefaultAsync(b => b.Id == bookingId);
         }
+
 
         public async Task SaveChangeAsync()
         {
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<Room>> SearchAsync(DateTime CheckIn, DateTime CheckOut, int Adults, int Children)
+        {
+            if(CheckOut <= CheckIn)
+            {
+                throw new Exception("Check-out phải sau checkin");
+            }
+            var query = _context.Rooms.Include(r => r.RoomType)
+                .Include(r => r.RoomImages)
+                .Include(r => r.RoomAmenities)
+                .ThenInclude(ra => ra.Amenity)
+                .Where(r => r.RoomType.MaxGuests >= Adults + Children).AsQueryable();
+            query =  query.Where(r => !_context.BookingDetails
+            .Any(d => d.RoomId == r.Id && d.Booking.Status != BookingStatus.Canceled 
+            && CheckIn < d.Booking.CheckOutDate &&
+            CheckOut > d.Booking.CheckInDate));
+
+            return await query.ToListAsync();
         }
     }
 }

@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Hero from "./components/user/Hero";
-import RoomTypeSection from "./components/user/RoomTypeSection";
 import FeaturedRooms from "./components/user/FeaturedRooms";
 import AmenitiesSection from "./components/user/AmenitiesSection";
 import CTASection from "./components/user/CTASection";
@@ -12,7 +11,7 @@ export default function HomePage() {
     <>
       <Navbar />
       <Hero />
-      <RoomTypeSection />
+      {/* <RoomTypeSection /> */}
       <FeaturedRooms />
       <AmenitiesSection />
       <CTASection />

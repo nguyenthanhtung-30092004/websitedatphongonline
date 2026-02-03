@@ -12,7 +12,7 @@
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public string? ResetCode { get; set; }
         public DateTime? ResetCodeExpired { get; set; }
-        public ICollection<Booking> Bookings { get; set; }
+        public ICollection<Booking>? Bookings { get; set; }
 
     }
 }

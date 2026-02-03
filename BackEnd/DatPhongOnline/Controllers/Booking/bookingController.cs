@@ -23,28 +23,42 @@ namespace DatPhongOnline.Controllers.Booking
         [HttpPost]
         public async Task<IActionResult> Create(CreateBookingDto dto)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            try
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
 
-            if (userIdClaim == null)
-                return Unauthorized("Token không chứa userId");
+                if (userIdClaim == null)
+                    return Unauthorized("Token không chứa userId");
 
-            int userId = int.Parse(userIdClaim.Value);
+                int userId = int.Parse(userIdClaim.Value);
 
-            var result = await _service.CreateBookingAsync(userId, dto);
-            return Ok(result);
+                var result = await _service.CreateBookingAsync(userId, dto);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPatch("{id}/cancel")]
         public async Task<IActionResult> Cancel(int id)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            try
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
 
-            if (userIdClaim == null)
-                return Unauthorized("Token không chứa userId");
+                if (userIdClaim == null)
+                    return Unauthorized("Token không chứa userId");
 
-            int userId = int.Parse(userIdClaim.Value);
-            await _service.CancelBooking(id, userId);
-            return Ok("Hủy thành công");
+                int userId = int.Parse(userIdClaim.Value);
+                await _service.CancelBooking(id, userId);
+                return Ok(new { message = "Hủy thành công" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet("my-bookings")]
@@ -59,6 +73,27 @@ namespace DatPhongOnline.Controllers.Booking
 
                 int userId = int.Parse(userIdClaim.Value);
                 var result = await _service.GetUserBookingsAsync(userId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+        [HttpGet("my-bookings/{id:int}")]
+        public async Task<IActionResult> GetBookingById([FromRoute] int id)
+        {
+            var booking = await _service.GetBookingByIdAsync(id);
+            return Ok(booking);
+        }
+
+
+        [HttpPost("search-rooms")]
+        public async Task<IActionResult> SearchAvailableRooms([FromBody] SearchRoomDto dto)
+        {
+            try
+            {
+                var result = await _service.SearchRoomsAsync(dto);
                 return Ok(result);
             }
             catch (Exception ex)

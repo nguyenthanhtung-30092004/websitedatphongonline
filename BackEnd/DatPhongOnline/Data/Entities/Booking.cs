@@ -18,5 +18,6 @@ namespace DatPhongOnline.Data.Entities
         public DateTime Createdat { get; set; } = DateTime.UtcNow;
 
         public ICollection<BookingDetail> BookingDetails { get; set; }
+        
     }
 }

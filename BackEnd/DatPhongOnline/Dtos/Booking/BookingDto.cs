@@ -15,6 +15,6 @@ namespace DatPhongOnline.Dtos.Booking
         [Column(TypeName = "decimal(18,2)")]
         public decimal TotalPrice { get; set; }
         public BookingStatus Status { get; set; }
-        public List<BookingDetailDto> BookingDetails { get; set; }
+        public List<BookingDetailDto>? BookingDetails { get; set; }
     }
 }

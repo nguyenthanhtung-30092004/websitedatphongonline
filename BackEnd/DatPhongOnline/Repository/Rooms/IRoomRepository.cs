@@ -15,5 +15,7 @@ namespace DatPhongOnline.Repository.Rooms
         Task<List<RoomImage>> GetImagesByRoomIdAsync(int roomId);
         Task RemoveImagesAsync(int id);
         Task ReplaceAmenitiesAsync(int roomId, List<int> amenityIds);
+
+        
     }
 }
