@@ -8,7 +8,6 @@ export default function UserLayout({
 }) {
   return (
     <>
-      <div>Tùng</div>
       <Navbar />
       <main className="min-h-screen">{children}</main>
       <Footer />
