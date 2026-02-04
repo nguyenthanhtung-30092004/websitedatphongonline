@@ -51,6 +51,11 @@ const menu = [
     href: "/admin/users",
     icon: <UserOutlined />,
   },
+  {
+    label: "Room-Matrix",
+    href: "/admin/room-matrix",
+    icon: <UserOutlined />,
+  },
 ];
 
 export default function AdminLayout({

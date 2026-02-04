@@ -17,6 +17,8 @@ namespace DatPhongOnline.Data
         // Booking
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<BookingDetail> BookingDetails { get; set; }
+        public DbSet<DatCoc> DatCocs { get; set; }
+        public DbSet<ChatMessage> ChatMessages { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>(entity =>
@@ -58,6 +60,7 @@ namespace DatPhongOnline.Data
                 .HasOne(b => b.User)
                 .WithMany(u => u.Bookings)
                 .HasForeignKey(b => b.UserId);
+
         }
     }
 }

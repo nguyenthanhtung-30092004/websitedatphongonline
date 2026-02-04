@@ -97,5 +97,20 @@ namespace DatPhongOnline.Repository.Rooms
             _context.RoomAmenities.AddRange(news);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<List<Room>> GetAvailableRoomsAsync(DateTime checkIn, DateTime checkOut)
+        {
+            var bookedRoomIds = await _context.Bookings
+                .Where(b => b.Status != BookingStatus.Canceled)
+                .Where(b => checkIn < b.CheckOutDate && checkOut > b.CheckInDate)
+                .SelectMany(b => b.BookingDetails)
+                .Select(d => d.RoomId)
+                .Distinct()
+                .ToListAsync();
+            return await _context.Rooms
+        .Include(r => r.RoomType) // Load kèm thông tin loại phòng để AI/Frontend hiển thị
+        .Where(r => !bookedRoomIds.Contains(r.Id))
+        .ToListAsync();
+        }
     }
 }

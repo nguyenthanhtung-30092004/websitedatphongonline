@@ -1,19 +1,43 @@
-# Visual Studio
+# Visual Studio & IDE
 .vs/
 *.user
 *.suo
+.idea/
+.vscode/
 
-# Build
+# Build & Packages
 bin/
 obj/
+node_modules/
+dist/
+build/
+.next/
 
-# Logs
+# Logs & Temp
 *.log
+*.tmp
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# OS
+# OS Files
 .DS_Store
 Thumbs.db
 
-# Secrets
+# === SECRETS & CONFIGURATION ===
+# Chặn tất cả các file appsettings có thể chứa Key
+appsettings.json
 appsettings.Development.json
 appsettings.Production.json
+appsettings.local.json
+
+# Chặn file môi trường của Frontend (Next.js/React)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Backup/Template files
+*.bak
+*.orig

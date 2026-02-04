@@ -1,0 +1,4 @@
+{
+  "Groq": { "ApiKey": "YOUR_API_KEY_HERE" },
+  "VNPay": { "HashSecret": "YOUR_SECRET_HERE" }
+}

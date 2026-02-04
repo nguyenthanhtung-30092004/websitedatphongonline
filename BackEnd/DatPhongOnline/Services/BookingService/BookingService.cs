@@ -210,6 +210,12 @@ namespace DatPhongOnline.Services.BookingService
             if (booking.Status == BookingStatus.Completed || booking.Status == BookingStatus.Canceled)
                 throw new Exception("Không thể hủy booking đã hoàn tất hoặc đã hủy");
 
+            var now = DateTime.UtcNow; // hoặc Now nếu bạn dùng local
+            var hoursSinceCreated = (now - booking.Createdat).TotalHours;
+
+            if (hoursSinceCreated > 24)
+                throw new Exception("Đã quá 24 giờ kể từ khi đặt, không thể hủy booking");
+
             booking.Status = BookingStatus.Canceled;
             await _repo.SaveChangeAsync();
         }

@@ -1,109 +1,172 @@
 "use client";
 
-import Link from "next/link";
-import { Button, Result, Divider } from "antd";
-import { HomeOutlined, CalendarOutlined, PrinterOutlined } from "@ant-design/icons";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Button, Result, Divider, Spin, Tag } from "antd";
+import {
+  CheckCircleFilled,
+  HomeOutlined,
+  PrinterOutlined,
+  WalletOutlined,
+  CalendarOutlined,
+} from "@ant-design/icons";
+import dayjs from "dayjs";
+
+import { useBooking } from "@/hooks/useBooking";
+import { useDeposit } from "@/hooks/useDeposit";
+import { BookingResponse } from "@/types/booking";
+import { Deposit } from "@/types/deposit";
 
 export default function CheckoutSuccessPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const { getBookingById } = useBooking();
+  const { fetchDepositByBooking } = useDeposit();
+
+  const [booking, setBooking] = useState<BookingResponse | null>(null);
+  const [deposit, setDeposit] = useState<Deposit | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // 1. CHẨN ĐOÁN ID TỪ URL
+  const vnpRef = searchParams.get("vnp_TxnRef");
+  const bIdParam = searchParams.get("bookingId");
+  const localId =
+    typeof window !== "undefined"
+      ? localStorage.getItem("latest_booking_id")
+      : null;
+
+  const bookingIdRaw = bIdParam || vnpRef || localId;
+
+  useEffect(() => {
+    console.log("--- DEBUG CHECKOUT SUCCESS ---");
+    console.log("ID từ vnp_TxnRef:", vnpRef);
+    console.log("ID từ bookingId:", bIdParam);
+    console.log("ID từ LocalStorage:", localId);
+
+    const loadData = async () => {
+      if (!bookingIdRaw) {
+        console.error("Không tìm thấy bất kỳ ID nào!");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const id = Number(bookingIdRaw);
+        // Thử lấy dữ liệu đơn hàng
+        const data = await getBookingById(id);
+        setBooking(data);
+
+        // Thử lấy dữ liệu đặt cọc (có thể chậm hơn 1 chút do Backend xử lý IPN)
+        const depData = await fetchDepositByBooking(id).catch(() => null);
+        setDeposit(depData);
+
+        // Xóa ID tạm sau khi đã load thành công
+        localStorage.removeItem("latest_booking_id");
+      } catch (err) {
+        console.error("Lỗi gọi API:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [bookingIdRaw]);
+
+  const remainAmount = useMemo(() => {
+    if (!booking) return 0;
+    return booking.totalPrice - (deposit?.soTienDatCoc || 0);
+  }, [booking, deposit]);
+
+  if (loading)
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <Spin size="large" />
+      </div>
+    );
+
+  if (!booking) {
+    return (
+      <Result
+        status="warning"
+        title="Đang cập nhật trạng thái đơn hàng"
+        subTitle="Hệ thống đang xử lý thanh toán. Vui lòng chờ trong giây lát hoặc kiểm tra Lịch sử đặt phòng."
+        extra={
+          <Button onClick={() => window.location.reload()}>Thử lại</Button>
+        }
+      />
+    );
+  }
+
   return (
     <main className="bg-[#f3f1ee] min-h-screen py-20">
-      <div className="max-w-2xl mx-auto px-6">
-        <div className="bg-white rounded-[32px] p-12 shadow-sm text-center">
-          {/* Success Animation */}
-          <div className="mb-8">
-            <Result
-              status="success"
-              title={
-                <h2 className="text-3xl font-bold text-slate-900 mt-4">
-                  Đặt phòng thành công!
-                </h2>
-              }
-              subTitle={
-                <div className="text-gray-600 mt-4 space-y-2">
-                  <p>Cảm ơn bạn đã tin tưởng chúng tôi.</p>
-                  <p>Xác nhận sẽ được gửi đến email của bạn trong vài phút tới.</p>
-                </div>
-              }
-            />
-          </div>
+      <div className="max-w-2xl mx-auto bg-white rounded-[40px] p-12 shadow-xl">
+        <div className="text-center mb-8">
+          <CheckCircleFilled className="text-6xl text-green-500 mb-4" />
+          <h2 className="text-3xl font-bold">Thanh toán hoàn tất!</h2>
+          <p className="text-gray-500 italic">Mã đơn: #{booking.id}</p>
+        </div>
 
-          <Divider />
-
-          {/* Booking Details */}
-          <div className="text-left bg-slate-50 rounded-2xl p-8 my-8">
-            <h3 className="text-lg font-semibold text-slate-900 mb-6">Chi tiết đặt phòng</h3>
-
-            <div className="space-y-4">
-              <div className="flex justify-between items-center pb-4 border-b border-[#e6e1d8]">
-                <span className="text-gray-600 font-medium">Mã đơn</span>
-                <span className="font-semibold text-slate-900">#BK20250203001</span>
-              </div>
-
-              <div className="flex justify-between items-center pb-4 border-b border-[#e6e1d8]">
-                <span className="text-gray-600 font-medium">Trạng thái</span>
-                <span className="inline-block px-4 py-1 bg-green-50 text-green-700 rounded-full text-sm font-semibold">
-                  ✓ Đã xác nhận
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center pb-4 border-b border-[#e6e1d8]">
-                <span className="text-gray-600 font-medium flex items-center gap-2">
-                  <CalendarOutlined /> Check-in
-                </span>
-                <span className="font-semibold text-slate-900">03/02/2025</span>
-              </div>
-
-              <div className="flex justify-between items-center pb-4 border-b border-[#e6e1d8]">
-                <span className="text-gray-600 font-medium flex items-center gap-2">
-                  <CalendarOutlined /> Check-out
-                </span>
-                <span className="font-semibold text-slate-900">05/02/2025</span>
-              </div>
-
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600 font-medium">Tổng tiền</span>
-                <span className="text-2xl font-bold text-[#b89655]">₫2,000,000</span>
-              </div>
+        <div className="bg-slate-50 rounded-3xl p-8 mb-8 border border-slate-100">
+          <h3 className="font-bold mb-4 flex items-center gap-2">
+            <WalletOutlined /> Chi tiết tiền nong
+          </h3>
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <span>Tổng tiền:</span>
+              <span className="font-semibold">
+                {booking.totalPrice.toLocaleString()}đ
+              </span>
             </div>
-          </div>
-
-          {/* Next Steps */}
-          <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 mb-8 text-left">
-            <h4 className="font-semibold text-blue-900 mb-4">Bước tiếp theo</h4>
-            <ul className="space-y-2 text-sm text-blue-800">
-              <li>✓ Bạn sẽ nhận được email xác nhận</li>
-              <li>✓ Chuẩn bị các thông tin cần thiết cho check-in</li>
-              <li>✓ Liên hệ chúng tôi nếu có bất kỳ câu hỏi</li>
-            </ul>
-          </div>
-
-          {/* Actions */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Button
-              size="large"
-              className="flex-1 h-12 rounded-xl font-semibold border-[#b89655] text-[#b89655]"
-              icon={<PrinterOutlined />}
-            >
-              In hoá đơn
-            </Button>
-
-            <Link href="/rooms" className="flex-1">
-              <Button
-                type="primary"
-                size="large"
-                className="w-full h-12 rounded-xl font-semibold"
-                icon={<HomeOutlined />}
-                style={{ backgroundColor: "#b89655" }}
-              >
-                Khám phá thêm
-              </Button>
-            </Link>
+            <div className="flex justify-between text-green-600">
+              <span>Đã cọc (30%):</span>
+              <span>-{(deposit?.soTienDatCoc || 0).toLocaleString()}đ</span>
+            </div>
+            <Divider />
+            <div className="flex justify-between text-xl font-bold text-[#b89655]">
+              <span>Còn lại:</span>
+              <span>{remainAmount.toLocaleString()}đ</span>
+            </div>
           </div>
         </div>
 
-        {/* Contact Support */}
-        <div className="text-center mt-12 text-gray-600">
-          <p>Cần giúp đỡ? <Link href="#" className="text-[#b89655] font-semibold hover:underline">Liên hệ hỗ trợ</Link></p>
+        <div className="grid grid-cols-2 gap-4 mb-8 text-sm">
+          <div>
+            <p className="text-gray-400 uppercase font-bold text-[10px]">
+              Nhận phòng
+            </p>
+            <p className="font-semibold">
+              {dayjs(booking.checkInDate).format("DD/MM/YYYY")}
+            </p>
+          </div>
+          <div>
+            <p className="text-gray-400 uppercase font-bold text-[10px]">
+              Trả phòng
+            </p>
+            <p className="font-semibold">
+              {dayjs(booking.checkOutDate).format("DD/MM/YYYY")}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex gap-4">
+          <Button
+            block
+            size="large"
+            icon={<PrinterOutlined />}
+            onClick={() => window.print()}
+          >
+            In hóa đơn
+          </Button>
+          <Button
+            block
+            size="large"
+            type="primary"
+            className="bg-[#b89655]"
+            icon={<HomeOutlined />}
+            onClick={() => router.push("/rooms")}
+          >
+            Về trang chủ
+          </Button>
         </div>
       </div>
     </main>

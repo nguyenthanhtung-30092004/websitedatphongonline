@@ -3,20 +3,25 @@ import { useEffect, useState } from "react";
 import { message } from "antd";
 import { Room } from "@/types/room";
 import { RoomApi } from "@/services/api/room.api";
-
+import { roomTypeApi } from "@/services/api/roomType.api";
 export function useRoom() {
   const [rooms, setRooms] = useState<Room[]>([]);
+  const [roomTypes, setRoomTypes] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [submitting, setSubmitting] = useState(false);
 
-  const fetchRooms = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await RoomApi.getRooms();
-      setRooms(res.data);
-      console.log(res.data);
+      const [roomsRes, typesRes] = await Promise.all([
+        RoomApi.getRooms(),
+        roomTypeApi.getRoomTypes(),
+      ]);
+
+      setRooms(roomsRes.data);
+      setRoomTypes(typesRes.data);
     } catch {
-      message.error("Không tải được danh sách phòng");
+      message.error("Không tải được dữ liệu");
     } finally {
       setLoading(false);
     }
@@ -43,7 +48,7 @@ export function useRoom() {
       await RoomApi.createRoom(formData);
 
       message.success("Thêm phòng thành công");
-      fetchRooms();
+      fetchData();
     } catch (err) {
       message.error("Lỗi tạo phòng");
       throw err;
@@ -74,7 +79,7 @@ export function useRoom() {
 
       await RoomApi.updateRoom(id, formData);
       message.success("Cập nhật phòng thành công");
-      await fetchRooms();
+      await fetchData();
     } finally {
       setSubmitting(false);
     }
@@ -83,18 +88,19 @@ export function useRoom() {
   const deleteRoom = async (id: number) => {
     await RoomApi.deleteRoom(id);
     message.success("Xóa phòng thành công");
-    fetchRooms();
+    fetchData();
   };
 
   useEffect(() => {
-    fetchRooms();
+    fetchData();
   }, []);
 
   return {
+    roomTypes,
     rooms,
     loading,
     submitting,
-    reload: fetchRooms,
+    reload: fetchData,
     createRoom,
     updateRoom,
     deleteRoom,

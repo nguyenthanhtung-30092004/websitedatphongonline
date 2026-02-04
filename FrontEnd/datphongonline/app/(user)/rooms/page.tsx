@@ -5,21 +5,16 @@ import { useState } from "react";
 import { Pagination, Card } from "antd";
 import { useRoom } from "@/hooks/useRoom";
 
-/* ================= CONFIG ================= */
-
 const PAGE_SIZE = 6;
 const FEATURED_COUNT = 3;
 
-/* ================= PAGE ================= */
-
 export default function RoomsPage() {
-  const { rooms } = useRoom();
+  const { rooms, roomTypes } = useRoom(); // Lấy thêm roomTypes từ hook
   const [page, setPage] = useState(1);
 
   if (!rooms || rooms.length === 0) return null;
 
   const featuredRooms = rooms.slice(0, FEATURED_COUNT);
-
   const pagedRooms = rooms.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
@@ -56,6 +51,8 @@ export default function RoomsPage() {
       <section className="max-w-7xl mx-auto px-6 py-24 space-y-24">
         {featuredRooms.map((room, index) => {
           const reverse = index % 2 === 1;
+          // Tìm dữ liệu RoomType tương ứng
+          const typeInfo = roomTypes.find((t) => t.id === room.roomTypeId);
 
           return (
             <div
@@ -63,7 +60,8 @@ export default function RoomsPage() {
               className="grid lg:grid-cols-2 gap-12 items-center"
             >
               {!reverse && <RoomImage src={room.imageUrls[0]} />}
-              <RoomContent room={room} />
+              {/* Truyền thêm typeInfo vào đây */}
+              <RoomContent room={room} typeInfo={typeInfo} />
               {reverse && <RoomImage src={room.imageUrls[0]} />}
             </div>
           );
@@ -133,7 +131,10 @@ function RoomImage({ src }: { src: string }) {
   );
 }
 
-function RoomContent({ room }: { room: any }) {
+function RoomContent({ room, typeInfo }: { room: any; typeInfo: any }) {
+  // Hàm helper để parse thông tin từ mô tả (nếu dữ liệu trả về là chuỗi mô tả dài)
+  // Ở đây mình giả định typeInfo có các trường: description, maxGuests...
+
   return (
     <div className="bg-[#f7f5f2] p-10 rounded-2xl">
       <div className="flex items-center gap-1 mb-4">
@@ -144,31 +145,41 @@ function RoomContent({ room }: { room: any }) {
         ))}
       </div>
 
-      <h2 className="text-2xl font-semibold mb-4">{room.roomName}</h2>
+      <h2 className="text-2xl font-semibold mb-2">{room.roomName}</h2>
+      <p className="text-[#b89655] font-medium mb-4">{room.roomTypeName}</p>
 
-      <p className="text-gray-600 mb-6 leading-relaxed">
-        Không gian phòng sang trọng, đầy đủ tiện nghi, phù hợp cho kỳ nghỉ dưỡng
-        và công tác.
+      {/* Hiển thị mô tả từ RoomType */}
+      <p className="text-gray-600 mb-6 leading-relaxed line-clamp-3">
+        {typeInfo?.description ||
+          "Không gian phòng sang trọng, đầy đủ tiện nghi, phù hợp cho kỳ nghỉ dưỡng."}
       </p>
 
+      {/* Hiển thị các thông số kỹ thuật thực tế */}
       <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-6">
-        <div>👤 Max guests: 2</div>
-        <div>🛏 Bed: King Size</div>
-        <div>📐 Size: 35m²</div>
-        <div>🌆 View: City</div>
+        <div>👤 Sức chứa: {typeInfo?.maxGuests || "2"} người</div>
+        <div>
+          🛏 Giường:{" "}
+          {room.roomTypeName.includes("Đơn") ? "2 Giường đơn" : "Giường King"}
+        </div>
+        <div>
+          📐 Diện tích: {typeInfo?.description?.match(/\d+m²/)?.[0] || "30m²"}
+        </div>
+        <div>
+          🌆 Hướng: {typeInfo?.description?.match(/hướng\s\w+/)?.[0] || "Phố"}
+        </div>
       </div>
 
       <div className="flex items-center justify-between">
         <div className="text-2xl font-semibold">
           {room.basePrice.toLocaleString()}đ
-          <span className="text-sm text-gray-400"> / night</span>
+          <span className="text-sm text-gray-400"> / đêm</span>
         </div>
 
         <Link
           href={`/room-detail/${room.id}`}
           className="px-6 py-3 rounded-full bg-[#b89655] text-white text-sm font-medium hover:bg-[#a38345] transition"
         >
-          View details
+          Xem chi tiết
         </Link>
       </div>
     </div>
