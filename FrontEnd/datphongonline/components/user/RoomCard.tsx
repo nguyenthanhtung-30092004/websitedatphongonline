@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import * as AntdIcons from "@ant-design/icons";
 import { Room } from "@/types/room";
 import { Amenity } from "@/types/amenity";
@@ -18,10 +19,12 @@ export default function RoomCard({ room, amenities }: RoomCardProps) {
     >
       {/* IMAGE CONTAINER */}
       <div className="relative h-64 overflow-hidden">
-        <img
+        <Image
           src={room.imageUrls?.[0] || "/images/room-placeholder.jpg"}
           alt={room.roomName}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+          fill
+          className="object-cover group-hover:scale-110 transition-transform duration-700"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-[#1E3932] uppercase tracking-wider">
           Premium

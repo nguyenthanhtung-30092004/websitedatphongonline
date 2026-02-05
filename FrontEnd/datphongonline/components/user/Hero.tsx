@@ -1,6 +1,7 @@
 "use client";
 
 import SearchBox from "./SearchBox";
+import Image from "next/image";
 
 export default function Hero() {
   return (
@@ -37,10 +38,12 @@ export default function Hero() {
           {/* Image with Organic Frame */}
           <div className="relative">
             <div className="relative z-10 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-green-900/10 rotate-2 hover:rotate-0 transition-transform duration-700">
-              <img
+              <Image
                 src="/banner.png"
                 alt="Luxury Room"
-                className="w-full aspect-[4/5] object-cover scale-110 hover:scale-100 transition-transform duration-700"
+                fill
+                className="object-cover scale-110 hover:scale-100 transition-transform duration-700"
+                priority
               />
             </div>
             {/* Organic Shape Decor */}

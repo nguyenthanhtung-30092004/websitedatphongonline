@@ -1,16 +1,21 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Avatar, Dropdown } from "antd";
-import { AppstoreOutlined, UserOutlined } from "@ant-design/icons";
+import { UserOutlined } from "@ant-design/icons";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuths } from "@/hooks/useAuths";
 import { useEffect } from "react";
+import { NAV_LINKS } from "@/constants/navigation";
 
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, loading, logout, fetchUser } = useAuths();
+
+  // Navigation Links Filter based on Auth
+  const navLinks = NAV_LINKS.filter(link => link.public || user);
 
   // Cập nhật trạng thái người dùng khi quay lại trang chính
   useEffect(() => {
@@ -25,7 +30,7 @@ export default function Navbar() {
     router.replace("/");
   };
 
-  const items = [
+  const menuItems = [
     {
       key: "profile",
       label: <span className="px-2 py-1 block">Thông tin cá nhân</span>,
@@ -56,11 +61,14 @@ export default function Navbar() {
           href="/"
           className="relative group transition-transform duration-300 hover:scale-105"
         >
-          <div className="w-[140px] h-12 flex items-center justify-center">
-            <img
+          <div className="w-[140px] h-12 flex items-center justify-center relative">
+            <Image
               src="/logo.png"
-              className="w-full h-full object-contain"
+              fill
+              className="object-contain"
               alt="DatPhongOnline Logo"
+              sizes="140px"
+              priority
             />
           </div>
         </Link>
@@ -68,36 +76,19 @@ export default function Navbar() {
         {!loading && (
           <nav className="flex items-center gap-2 md:gap-8">
             <div className="hidden md:flex items-center gap-8">
-              <Link
-                href="/rooms"
-                className={`text-sm font-medium transition-colors duration-300 ${
-                  pathname === "/rooms"
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`flex items-center gap-2 text-sm font-medium transition-colors duration-300 ${pathname === link.href
                     ? "text-[#2D4F3C]"
                     : "text-stone-600 hover:text-[#2D4F3C]"
-                }`}
-              >
-                Khám phá phòng
-              </Link>
-              <Link
-                href="/availability"
-                className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded-lg"
-              >
-                <AppstoreOutlined />
-                <span>Sơ đồ phòng</span>
-              </Link>
-
-              {user && (
-                <Link
-                  href="/my-bookings"
-                  className={`text-sm font-medium transition-colors duration-300 ${
-                    pathname === "/my-bookings"
-                      ? "text-[#2D4F3C]"
-                      : "text-stone-600 hover:text-[#2D4F3C]"
-                  }`}
+                    } ${link.icon ? "px-4 py-2 hover:bg-gray-100 rounded-lg" : ""}`}
                 >
-                  Đơn đặt của tôi
+                  {link.icon}
+                  <span>{link.label}</span>
                 </Link>
-              )}
+              ))}
             </div>
 
             <div className="h-6 w-[1px] bg-stone-200 mx-2 hidden md:block" />
@@ -120,7 +111,7 @@ export default function Navbar() {
             ) : (
               <div className="flex items-center gap-4">
                 <Dropdown
-                  menu={{ items }}
+                  menu={{ items: menuItems }}
                   classNames={{ root: "my-dropdown" }}
                   placement="bottomRight"
                   trigger={["click"]}

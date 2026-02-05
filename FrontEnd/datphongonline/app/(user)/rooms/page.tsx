@@ -13,7 +13,7 @@ import {
   CalendarOutlined,
   EnvironmentOutlined,
 } from "@ant-design/icons";
-import RoomCard from "@/app/components/user/RoomCard";
+import RoomCard from "@/components/user/RoomCard";
 
 const PAGE_SIZE = 6;
 const FEATURED_COUNT = 3;
@@ -154,9 +154,8 @@ export default function RoomsPage() {
               className="grid lg:grid-cols-12 gap-16 lg:gap-24 items-center"
             >
               <div
-                className={`lg:col-span-7 relative group ${
-                  reverse ? "lg:order-2" : "lg:order-1"
-                }`}
+                className={`lg:col-span-7 relative group ${reverse ? "lg:order-2" : "lg:order-1"
+                  }`}
               >
                 <div className="absolute inset-0 bg-[#D4E9E2] rounded-[3rem] translate-x-6 translate-y-6 -z-10 transition-transform duration-500 group-hover:translate-x-4 group-hover:translate-y-4" />
                 <div className="rounded-[3rem] overflow-hidden shadow-2xl aspect-[4/3]">

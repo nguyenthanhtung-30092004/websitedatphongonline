@@ -1,15 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import {
-  FacebookFilled,
-  InstagramFilled,
-  YoutubeFilled,
-  PhoneOutlined,
-  MailOutlined,
-  ClockCircleOutlined,
-  EnvironmentOutlined,
-} from "@ant-design/icons";
+import { EnvironmentOutlined } from "@ant-design/icons";
+import { EXPLORE_LINKS, SOCIAL_LINKS, SUPPORT_INFO } from "@/constants/navigation";
 
 export default function Footer() {
   return (
@@ -36,11 +29,7 @@ export default function Footer() {
 
             {/* Social Icons */}
             <div className="flex gap-4">
-              {[
-                { icon: <FacebookFilled />, href: "#" },
-                { icon: <InstagramFilled />, href: "#" },
-                { icon: <YoutubeFilled />, href: "#" },
-              ].map((social, idx) => (
+              {SOCIAL_LINKS.map((social, idx) => (
                 <a
                   key={idx}
                   href={social.href}
@@ -58,12 +47,7 @@ export default function Footer() {
               Khám phá
             </h4>
             <ul className="space-y-4">
-              {[
-                { href: "/", label: "Trang chủ" },
-                { href: "/rooms", label: "Danh sách phòng" },
-                { href: "/amenities", label: "Tiện nghi" },
-                { href: "/contact", label: "Liên hệ" },
-              ].map((item) => (
+              {EXPLORE_LINKS.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
@@ -83,43 +67,21 @@ export default function Footer() {
               Hỗ trợ khách hàng
             </h4>
             <ul className="space-y-5">
-              <li className="flex items-start gap-3 group">
-                <div className="w-8 h-8 rounded-lg bg-[#D4E9E2]/50 flex items-center justify-center text-[#1E3932] group-hover:bg-[#1E3932] group-hover:text-white transition-colors duration-300">
-                  <PhoneOutlined />
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-stone-300 uppercase">
-                    Hotline 24/7
-                  </p>
-                  <p className="text-sm font-bold text-stone-700">1900 9999</p>
-                </div>
-              </li>
-              <li className="flex items-start gap-3 group">
-                <div className="w-8 h-8 rounded-lg bg-[#D4E9E2]/50 flex items-center justify-center text-[#1E3932] group-hover:bg-[#1E3932] group-hover:text-white transition-colors duration-300">
-                  <MailOutlined />
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-stone-300 uppercase">
-                    Email
-                  </p>
-                  <p className="text-sm font-bold text-stone-700">
-                    support@datphongonline.vn
-                  </p>
-                </div>
-              </li>
-              <li className="flex items-start gap-3 group">
-                <div className="w-8 h-8 rounded-lg bg-[#D4E9E2]/50 flex items-center justify-center text-[#1E3932] group-hover:bg-[#1E3932] group-hover:text-white transition-colors duration-300">
-                  <ClockCircleOutlined />
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-stone-300 uppercase">
-                    Giờ làm việc
-                  </p>
-                  <p className="text-sm font-bold text-stone-700">
-                    08:00 – 22:00
-                  </p>
-                </div>
-              </li>
+              {SUPPORT_INFO.map((item, idx) => (
+                <li key={idx} className="flex items-start gap-3 group">
+                  <div className="w-8 h-8 rounded-lg bg-[#D4E9E2]/50 flex items-center justify-center text-[#1E3932] group-hover:bg-[#1E3932] group-hover:text-white transition-colors duration-300">
+                    {item.icon}
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-stone-300 uppercase">
+                      {item.label}
+                    </p>
+                    <p className="text-sm font-bold text-stone-700">
+                      {item.value}
+                    </p>
+                  </div>
+                </li>
+              ))}
             </ul>
           </div>
 
