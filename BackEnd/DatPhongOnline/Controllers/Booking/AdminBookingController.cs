@@ -1,4 +1,5 @@
-﻿using DatPhongOnline.Services.BookingService;
+﻿using DatPhongOnline.Dtos.Booking;
+using DatPhongOnline.Services.BookingService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +8,6 @@ namespace DatPhongOnline.Controllers.Booking
 {
     [Route("api/admin/booking")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
     public class AdminBookingController : ControllerBase
     {
         private readonly IBookingService _service;
@@ -16,7 +16,7 @@ namespace DatPhongOnline.Controllers.Booking
         {
             this._service = service;
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -30,6 +30,7 @@ namespace DatPhongOnline.Controllers.Booking
                 return BadRequest(new { message = ex.Message });
             }
         }
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{id}/pending")]
         public async Task<IActionResult> Pending(int id)
         {
@@ -43,6 +44,7 @@ namespace DatPhongOnline.Controllers.Booking
                 return BadRequest(new { message = ex.Message });
             }
         }
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{id}/cancel")]
         public async Task<IActionResult> Cancel(int id)
         {
@@ -56,7 +58,7 @@ namespace DatPhongOnline.Controllers.Booking
                 return BadRequest(new { message = ex.Message });
             }
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{id}/confirm")]
         public async Task<IActionResult> Confirm(int id)
         {
@@ -70,7 +72,7 @@ namespace DatPhongOnline.Controllers.Booking
                 return BadRequest(new { message = ex.Message });
             }
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{id}/complete")]
         public async Task<IActionResult> Complete(int id)
         {
@@ -83,6 +85,15 @@ namespace DatPhongOnline.Controllers.Booking
             {
                 return BadRequest(new { message = ex.Message });
             }
+        }
+
+        [HttpGet("matrix")]
+        public async Task<ActionResult<List<RoomMatrixDto>>> GetMatrix([FromQuery] DateTime start, [FromQuery] DateTime end)
+        {
+            if (start > end) return BadRequest("Ngày bắt đầu phải nhỏ hơn ngày kết thúc.");
+
+            var matrix = await _service.GetRoomMatrixAsync(start, end);
+            return Ok(matrix);
         }
     }
 }

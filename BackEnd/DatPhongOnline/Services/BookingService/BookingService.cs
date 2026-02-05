@@ -58,7 +58,6 @@ namespace DatPhongOnline.Services.BookingService
         }
 
         //user
-
         public async Task<List<BookingDto>> GetUserBookingsAsync(int userId)
         {
             var bookings = await _repo.GetUserBookingsAsync(userId);
@@ -85,7 +84,6 @@ namespace DatPhongOnline.Services.BookingService
                     .ToList()
             }).ToList();
         }
-
         public async Task<BookingDto?> GetBookingByIdAsync(int bookingId)
         {
             var booking = await _repo.GetBookingByIdAsync(bookingId);
@@ -116,7 +114,6 @@ namespace DatPhongOnline.Services.BookingService
                     .ToList()
             };
         }
-
         public async Task<BookingDto> CreateBookingAsync(int userId, CreateBookingDto dto)
         {
             if (dto.RoomIds == null || dto.RoomIds.Count == 0)
@@ -197,7 +194,6 @@ namespace DatPhongOnline.Services.BookingService
                     .ToList()
             };
         }
-
         public async Task CancelBooking(int bookingId, int userId)
         {
             var booking = await _repo.GetBookingByIdAsync(bookingId);
@@ -219,8 +215,7 @@ namespace DatPhongOnline.Services.BookingService
             booking.Status = BookingStatus.Canceled;
             await _repo.SaveChangeAsync();
         }
-
-            public async Task<List<RoomDto>> SearchRoomsAsync(SearchRoomDto dto)
+        public async Task<List<RoomDto>> SearchRoomsAsync(SearchRoomDto dto)
             {
                 if (dto.CheckOut <= dto.CheckIn)
                     throw new Exception("Ngày checkout phải sau check-in");
@@ -239,5 +234,88 @@ namespace DatPhongOnline.Services.BookingService
                     Amenities = r.RoomAmenities.Select(a => a.Amenity.Name).ToList()
                 }).ToList();
             }
+
+        public async Task<List<RoomDto>> GetTopBookedRoomAsync(int top)
+        {
+            var rooms = await _repo.GetTopBookedRoomsAsync(top);
+            return rooms.Select(r => new RoomDto
+            {
+                Id = r.Id,
+                RoomName = r.RoomName,
+                Address = r.Address,
+                BasePrice = r.BasePrice,
+                RoomTypeId = r.RoomTypeId,
+                ImageUrls = r.RoomImages.Select(i => i.ImageUrl).ToList(),
+                Amenities = r.RoomAmenities.Select(a => a.Amenity.Name).ToList()
+            }).ToList();
+        }
+
+        public async Task<List<RoomMatrixDto>> GetRoomMatrixAsync(DateTime startDate, DateTime endDate)
+        {
+            // 1. Lấy danh sách phòng hiện có
+            var rooms = await _roomRepo.GetAllAsync();
+
+            // 2. Lấy booking từ Repository (Đã sửa logic lọc ngày ở trên)
+            var bookings = await _repo.GetBookingsInRangeAsync(startDate, endDate);
+
+            // 3. Lọc Occupancy: Chỉ lấy các booking "Đang giữ chỗ" (0 và 1)
+            // Nếu bạn muốn Status 2 (Complete) cũng hiện màu đỏ thì thêm (int)b.Status == 2
+            var roomOccupancy = bookings
+                .Where(b => b.BookingDetails != null &&
+                           ((int)b.Status == 0 || (int)b.Status == 1))
+                .SelectMany(b => b.BookingDetails.Select(d => new
+                {
+                    d.RoomId,
+                    CheckIn = b.CheckInDate.Date,
+                    CheckOut = b.CheckOutDate.Date
+                }))
+                .ToLookup(x => x.RoomId);
+
+            var result = new List<RoomMatrixDto>();
+
+            foreach (var room in rooms)
+            {
+                var dto = new RoomMatrixDto
+                {
+                    RoomId = room.Id,
+                    RoomName = room.RoomName,
+                    Days = new List<RoomDayStatusDto>()
+                };
+
+                var occupancy = roomOccupancy[room.Id].ToList();
+
+                for (var date = startDate.Date; date <= endDate.Date; date = date.AddDays(1))
+                {
+                    // Kiểm tra trạng thái Occupied (Bận)
+                    // Khách ở từ Check-in đến TRƯỚC ngày Check-out
+                    bool isOccupied = occupancy.Any(o => date >= o.CheckIn && date < o.CheckOut);
+
+                    if (isOccupied)
+                    {
+                        dto.Days.Add(new RoomDayStatusDto
+                        {
+                            Date = DateOnly.FromDateTime(date),
+                            Status = "Occupied"
+                        });
+                    }
+                    else
+                    {
+                        // Kiểm tra trạng thái Upcoming (Sắp đến)
+                        // Nếu ngày mai khách đúng ngày Check-in
+                        bool isUpcoming = occupancy.Any(o => o.CheckIn == date.AddDays(1));
+
+                        dto.Days.Add(new RoomDayStatusDto
+                        {
+                            Date = DateOnly.FromDateTime(date),
+                            Status = isUpcoming ? "Upcoming" : "Available"
+                        });
+                    }
+                }
+                result.Add(dto);
+            }
+
+            return result;
+        }
+
     }
 }

@@ -46,4 +46,7 @@ export const BookingApi = {
     api.patch(`/api/admin/booking/${id}/pending`),
   setCancelBooking: (id: number) =>
     api.patch(`/api/admin/booking/${id}/cancel`),
+  getBestSellingRoom: (top: number) => api.get(`/api/booking/bestselling`),
+  getRoomMatrix: (start: string, end: string) =>
+    api.get(`/api/admin/booking/matrix?start=${start}&end=${end}`),
 };

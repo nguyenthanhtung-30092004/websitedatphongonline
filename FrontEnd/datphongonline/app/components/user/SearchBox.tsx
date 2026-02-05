@@ -1,7 +1,11 @@
 "use client";
 
 import { DatePicker, InputNumber, ConfigProvider, Popover } from "antd";
-import { CalendarOutlined, UserOutlined } from "@ant-design/icons";
+import {
+  CalendarOutlined,
+  UserOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import dayjs, { Dayjs } from "dayjs";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -13,13 +17,11 @@ export default function SearchBox() {
   const [dates, setDates] = useState<[Dayjs, Dayjs] | null>(null);
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
-  const guestLabel = `${adults} người lớn · ${children} trẻ em`;
+  const guestLabel = `${adults} người lớn, ${children} trẻ em`;
 
   const handleSearch = () => {
     if (!dates) return;
-
     const [checkIn, checkOut] = dates;
-
     router.push(
       `/search?checkIn=${checkIn.format("YYYY-MM-DD")}&checkOut=${checkOut.format(
         "YYYY-MM-DD",
@@ -31,81 +33,79 @@ export default function SearchBox() {
     <ConfigProvider
       theme={{
         token: {
-          colorPrimary: "#f97316",
-          borderRadius: 16,
-          fontFamily: "'Plus Jakarta Sans', sans-serif",
-        },
-        components: {
-          DatePicker: {
-            activeShadow: "none",
-          },
+          colorPrimary: "#1E3932",
+          borderRadius: 12,
         },
       }}
     >
-      <div className="bg-white rounded-2xl shadow-lg px-6 py-4">
-        <div className="flex flex-col md:flex-row items-center gap-4">
-          {/* Dates */}
-          <div className="flex-1 bg-gray-100 rounded-xl px-5 py-3">
-            <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
-              <CalendarOutlined />
-              <span>Check in – Check out</span>
+      <div className="bg-white/80 backdrop-blur-xl p-3 md:p-4 rounded-[2rem] shadow-2xl shadow-stone-200/50 border border-white">
+        <div className="flex flex-col md:flex-row items-stretch gap-3">
+          {/* Dates Section */}
+          <div className="flex-1 group hover:bg-stone-50 rounded-2xl px-6 py-3 transition-colors duration-300 border border-transparent hover:border-stone-100">
+            <div className="flex items-center gap-2 text-stone-400 text-[10px] uppercase font-bold tracking-tighter mb-1">
+              <CalendarOutlined className="text-[#C9A96A]" />
+              <span>Thời gian lưu trú</span>
             </div>
-
             <RangePicker
               variant="borderless"
-              className="w-full text-base font-medium text-gray-800 px-0"
+              className="w-full p-0 font-medium text-stone-800"
               disabledDate={(d) => d && d < dayjs().startOf("day")}
               placeholder={["Ngày đến", "Ngày đi"]}
               onChange={(v) => setDates(v as any)}
             />
           </div>
 
-          {/* Guests */}
+          <div className="hidden md:block w-[1px] bg-stone-100 my-4" />
+
+          {/* Guests Section */}
           <Popover
             trigger="click"
             placement="bottom"
             content={
-              <div className="space-y-4 w-56">
-                {/* Adults */}
+              <div className="p-2 space-y-5 w-64">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm">Người lớn</span>
+                  <div className="text-sm font-medium text-stone-700">
+                    Người lớn
+                  </div>
                   <InputNumber
                     min={1}
                     value={adults}
                     onChange={(v) => setAdults(v || 1)}
+                    className="rounded-lg"
                   />
                 </div>
-
-                {/* Children */}
                 <div className="flex justify-between items-center">
-                  <span className="text-sm">Trẻ em</span>
+                  <div className="text-sm font-medium text-stone-700">
+                    Trẻ em
+                  </div>
                   <InputNumber
                     min={0}
                     value={children}
                     onChange={(v) => setChildren(v || 0)}
+                    className="rounded-lg"
                   />
                 </div>
               </div>
             }
           >
-            <div className="w-full md:w-[240px] bg-gray-100 rounded-xl px-5 py-3 cursor-pointer">
-              <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
-                <UserOutlined />
-                <span>Guests</span>
+            <div className="flex-1 group hover:bg-stone-50 rounded-2xl px-6 py-3 transition-colors duration-300 border border-transparent hover:border-stone-100 cursor-pointer">
+              <div className="flex items-center gap-2 text-stone-400 text-[10px] uppercase font-bold tracking-tighter mb-1">
+                <UserOutlined className="text-[#C9A96A]" />
+                <span>Số lượng khách</span>
               </div>
-
-              <div className="text-base font-medium text-gray-800">
+              <div className="font-medium text-stone-800 truncate">
                 {guestLabel}
               </div>
             </div>
           </Popover>
 
-          {/* Button */}
+          {/* Search Action */}
           <button
             onClick={handleSearch}
-            className="h-[60px] hover:cursor-pointer px-10 rounded-xl bg-orange-500 text-white font-semibold hover:bg-orange-600 transition"
+            className="bg-[#1E3932] hover:bg-[#2D4F3C] text-white px-8 py-4 md:py-0 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all duration-300 shadow-lg shadow-green-900/20 active:scale-95"
           >
-            Search
+            <SearchOutlined className="text-lg" />
+            <span>Tìm ngay</span>
           </button>
         </div>
       </div>

@@ -13,5 +13,8 @@ namespace DatPhongOnline.Repository.Bookings
         Task<List<Room>> SearchAvailableRoomsAsync(DateTime checkIn,DateTime checkOut,int numberOfGuests,int? roomTypeId = null);
         Task SaveChangeAsync();
         Task<List<Room>> SearchAsync(DateTime CheckIn, DateTime CheckOut, int Adults, int Children);
+        Task<List<Room>> GetTopBookedRoomsAsync(int top);
+
+        Task<List<Booking>> GetBookingsInRangeAsync(DateTime start, DateTime end);
     }
 }

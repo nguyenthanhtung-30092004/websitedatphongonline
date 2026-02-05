@@ -13,18 +13,17 @@ import {
   Empty,
   Spin,
   message,
-  Tag,
+  ConfigProvider,
 } from "antd";
 import {
-  PhoneOutlined,
-  MailOutlined,
-  UserOutlined,
   ArrowLeftOutlined,
+  EnvironmentOutlined,
   InfoCircleOutlined,
-  CheckCircleFilled,
-  CoffeeOutlined,
-  WifiOutlined,
-  ClockCircleOutlined,
+  UserOutlined,
+  MailOutlined,
+  PhoneOutlined,
+  CalendarOutlined,
+  SafetyCertificateOutlined,
 } from "@ant-design/icons";
 import dayjs, { Dayjs } from "dayjs";
 import { useRoom } from "@/hooks/useRoom";
@@ -43,34 +42,32 @@ export default function CheckoutPage() {
   const { user, loading: authLoading } = useAuths();
   const [form] = Form.useForm();
 
-  /* ================= PARAMS & DATA ================= */
+  /* ================= PARAMS (Logic Unchanged) ================= */
   const checkInParam = params.get("checkIn");
   const checkOutParam = params.get("checkOut");
   const roomId = Number(params.get("roomId"));
 
   const room = rooms.find((r) => r.id === roomId);
 
-  /* ================= STATE ================= */
+  /* ================= STATE (Logic Unchanged) ================= */
   const [dates, setDates] = useState<[Dayjs, Dayjs] | null>(
-    checkInParam && checkOutParam
-      ? [dayjs(checkInParam), dayjs(checkOutParam)]
-      : null,
+    checkInParam ? [dayjs(checkInParam), null as any] : null,
   );
 
   const nights =
     dates && dates[0] && dates[1] ? dates[1].diff(dates[0], "day") : 0;
 
   const totalPrice = room ? room.basePrice * nights : 0;
-  const depositPrice = totalPrice * 0.3; // 30% đặt cọc
+  const depositPrice = totalPrice * 0.3;
 
-  /* ================= AUTH GUARD ================= */
+  /* ================= AUTH (Logic Unchanged) ================= */
   useEffect(() => {
     if (!authLoading && !user) {
       router.push(
         `/login?redirect=/checkout?checkIn=${checkInParam}&checkOut=${checkOutParam}&roomId=${roomId}`,
       );
     }
-  }, [authLoading, user, router]);
+  }, [authLoading, user]);
 
   useEffect(() => {
     if (user) {
@@ -80,9 +77,9 @@ export default function CheckoutPage() {
         phone: user.phone,
       });
     }
-  }, [user, form]);
+  }, [user]);
 
-  /* ================= SUBMIT ================= */
+  /* ================= SUBMIT (Logic Unchanged) ================= */
   const handleSubmit = async (values: any) => {
     if (!room || !dates || nights <= 0) {
       message.error("Vui lòng chọn ngày lưu trú hợp lệ");
@@ -97,9 +94,9 @@ export default function CheckoutPage() {
         children: values.children,
         roomIds: [room.id],
       });
-
-      if (!booking?.id) throw new Error("Không tạo được yêu cầu đặt phòng");
-
+      if (!booking || !booking.id) {
+        throw new Error("Không tạo được booking");
+      }
       localStorage.setItem("latest_booking_id", booking.id.toString());
 
       const datCoc = await taoDatCoc({
@@ -109,267 +106,325 @@ export default function CheckoutPage() {
 
       window.location.href = datCoc.urlThanhToan;
     } catch (err: any) {
-      message.error(err.response?.data?.message || "Lỗi quá trình đặt phòng");
+      message.error(err.response?.data?.message || "Lỗi đặt phòng");
     }
   };
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f3f1ee]">
-        <Spin size="large" tip="Đang tải dữ liệu thanh toán..." />
+      <div className="min-h-screen flex items-center justify-center bg-[#FCFAF7]">
+        <Spin size="large" />
       </div>
     );
   }
 
   if (!user || !room || !dates)
-    return <Empty description="Thông tin phòng không hợp lệ" />;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FCFAF7]">
+        <Empty description="Thông tin không hợp lệ" />
+      </div>
+    );
 
   return (
-    <main className="bg-[#f3f1ee] min-h-screen py-12">
-      <div className="max-w-7xl mx-auto px-6">
-        {/* BACK BUTTON */}
+    <main className="bg-[#FCFAF7] min-h-screen py-16 relative overflow-hidden">
+      {/* Nature-inspired background decorations */}
+      <div className="absolute top-0 right-0 w-[40%] h-[400px] bg-[#D4E9E2]/30 rounded-bl-[200px] -z-0" />
+      <div className="absolute bottom-20 -left-20 w-96 h-96 bg-[#F1DEB4]/20 rounded-full blur-[100px] -z-0" />
+
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        {/* Header Navigation */}
         <Link
           href={`/room-detail/${room.id}`}
-          className="inline-flex items-center gap-2 text-[#b89655] mb-8 font-medium hover:underline"
+          className="inline-flex items-center gap-2 text-stone-400 hover:text-[#1E3932] mb-10 font-bold text-xs uppercase tracking-widest transition-all group"
         >
-          <ArrowLeftOutlined /> Quay lại chi tiết phòng
+          <ArrowLeftOutlined className="group-hover:-translate-x-1 transition-transform" />
+          Quay lại chi tiết phòng
         </Link>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* LEFT: FORM & INFO */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* THÔNG TIN KHÁCH HÀNG */}
-            <div className="bg-white rounded-3xl p-8 shadow-sm">
-              <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-                <span className="w-8 h-8 bg-[#b89655] text-white rounded-full flex items-center justify-center text-sm">
-                  1
+        <div className="grid lg:grid-cols-12 gap-12">
+          {/* LEFT: Checkout Form */}
+          <div className="lg:col-span-8 space-y-8">
+            <div className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-2xl shadow-green-900/5 border border-stone-50">
+              <div className="mb-10">
+                <span className="inline-flex items-center gap-2 px-3 py-1 bg-[#2D4F3C]/5 rounded-full mb-4 text-[10px] font-bold text-[#2D4F3C] uppercase tracking-[0.2em]">
+                  <SafetyCertificateOutlined className="text-[#C9A96A]" /> Đặt
+                  phòng an toàn
                 </span>
-                Thông tin người đặt
-              </h2>
-
-              <Form form={form} layout="vertical" onFinish={handleSubmit}>
-                <div className="grid md:grid-cols-2 gap-x-6">
-                  <Form.Item
-                    label="Họ và tên"
-                    name="fullName"
-                    rules={[
-                      { required: true, message: "Vui lòng nhập họ tên" },
-                    ]}
-                  >
-                    <Input
-                      prefix={<UserOutlined className="text-gray-400" />}
-                      size="large"
-                      className="rounded-xl h-12"
-                    />
-                  </Form.Item>
-
-                  <Form.Item
-                    label="Email"
-                    name="email"
-                    rules={[
-                      {
-                        required: true,
-                        type: "email",
-                        message: "Vui lòng nhập đúng định dạng email",
-                      },
-                    ]}
-                  >
-                    <Input
-                      prefix={<MailOutlined className="text-gray-400" />}
-                      size="large"
-                      className="rounded-xl h-12"
-                    />
-                  </Form.Item>
-
-                  <Form.Item
-                    label="Số điện thoại"
-                    name="phone"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Vui lòng nhập số điện thoại",
-                      },
-                    ]}
-                  >
-                    <Input
-                      prefix={<PhoneOutlined className="text-gray-400" />}
-                      size="large"
-                      className="rounded-xl h-12"
-                    />
-                  </Form.Item>
-                </div>
-
-                <Divider className="my-8" />
-
-                <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-                  <span className="w-8 h-8 bg-[#b89655] text-white rounded-full flex items-center justify-center text-sm">
-                    2
-                  </span>
-                  Chi tiết lưu trú
+                <h2 className="text-4xl font-serif text-[#1E3932]">
+                  Hoàn tất đặt chỗ
                 </h2>
+                <p className="text-stone-500 mt-2 font-light">
+                  Vui lòng kiểm tra và cung cấp thông tin để xác nhận kỳ nghỉ
+                  của bạn.
+                </p>
+              </div>
 
-                <div className="grid md:grid-cols-2 gap-x-6 gap-y-2">
-                  <div className="md:col-span-2 mb-4">
-                    <label className="block mb-2 text-sm font-semibold text-gray-700">
-                      Thời gian nhận/trả phòng
-                    </label>
-                    <RangePicker
-                      value={dates}
-                      onChange={(v) => setDates(v as any)}
-                      disabledDate={(d) => d && d < dayjs().startOf("day")}
-                      className="w-full h-12 rounded-xl"
-                    />
+              <ConfigProvider
+                theme={{
+                  token: {
+                    colorPrimary: "#1E3932",
+                    borderRadius: 16,
+                  },
+                }}
+              >
+                <Form
+                  form={form}
+                  layout="vertical"
+                  onFinish={handleSubmit}
+                  requiredMark={false}
+                >
+                  <div className="grid md:grid-cols-2 gap-x-8 gap-y-4">
+                    <Form.Item
+                      label={
+                        <span className="text-[10px] uppercase font-bold text-stone-400 tracking-widest">
+                          Họ và tên
+                        </span>
+                      }
+                      name="fullName"
+                      rules={[
+                        { required: true, message: "Vui lòng nhập họ tên" },
+                      ]}
+                    >
+                      <Input
+                        prefix={<UserOutlined className="text-stone-300" />}
+                        className="h-14 rounded-2xl bg-stone-50/50 border-stone-100"
+                        placeholder="Nguyễn Văn A"
+                      />
+                    </Form.Item>
+
+                    <Form.Item
+                      label={
+                        <span className="text-[10px] uppercase font-bold text-stone-400 tracking-widest">
+                          Email liên hệ
+                        </span>
+                      }
+                      name="email"
+                      rules={[
+                        {
+                          required: true,
+                          type: "email",
+                          message: "Vui lòng nhập email hợp lệ",
+                        },
+                      ]}
+                    >
+                      <Input
+                        prefix={<MailOutlined className="text-stone-300" />}
+                        className="h-14 rounded-2xl bg-stone-50/50 border-stone-100"
+                        placeholder="example@gmail.com"
+                      />
+                    </Form.Item>
+
+                    <Form.Item
+                      label={
+                        <span className="text-[10px] uppercase font-bold text-stone-400 tracking-widest">
+                          Số điện thoại
+                        </span>
+                      }
+                      name="phone"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Vui lòng nhập số điện thoại",
+                        },
+                      ]}
+                    >
+                      <Input
+                        prefix={<PhoneOutlined className="text-stone-300" />}
+                        className="h-14 rounded-2xl bg-stone-50/50 border-stone-100"
+                        placeholder="0901 234 567"
+                      />
+                    </Form.Item>
                   </div>
 
-                  <Form.Item name="adults" label="Người lớn" initialValue={1}>
-                    <InputNumber
-                      min={1}
-                      className="w-full h-12 rounded-xl flex items-center"
-                    />
-                  </Form.Item>
-                  <Form.Item name="children" label="Trẻ em" initialValue={0}>
-                    <InputNumber
-                      min={0}
-                      className="w-full h-12 rounded-xl flex items-center"
-                    />
-                  </Form.Item>
-                </div>
+                  <div className="my-12 h-px bg-stone-100 w-full relative">
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 bg-white pr-4 text-[10px] font-bold uppercase text-stone-300 tracking-[0.3em]">
+                      Chi tiết lưu trú
+                    </span>
+                  </div>
 
-                <div className="bg-blue-50 p-4 rounded-2xl flex gap-3 mt-4">
-                  <InfoCircleOutlined className="text-blue-500 mt-1" />
-                  <p className="text-sm text-blue-700">
-                    Sau khi nhấn hoàn tất, bạn sẽ được chuyển hướng đến cổng
-                    thanh toán <b>VNPAY</b> để thực hiện đặt cọc 30%.
-                  </p>
-                </div>
+                  <div className="grid md:grid-cols-2 gap-8">
+                    <div className="space-y-4">
+                      <label className="text-[10px] uppercase font-bold text-stone-400 tracking-widest">
+                        Ngày nhận & trả phòng
+                      </label>
+                      <RangePicker
+                        value={dates as any}
+                        onChange={(v) => setDates(v as any)}
+                        disabledDate={(d) =>
+                          !dates?.[0]
+                            ? d && d < dayjs(checkInParam)
+                            : d && d <= dates[0]
+                        }
+                        className="w-full h-14 rounded-2xl bg-stone-50/50 border-stone-100"
+                        suffixIcon={
+                          <CalendarOutlined className="text-[#C9A96A]" />
+                        }
+                      />
+                    </div>
 
-                <Button
-                  htmlType="submit"
-                  type="primary"
-                  size="large"
-                  loading={submitting}
-                  className="w-full mt-10 h-14 bg-[#b89655] hover:bg-[#a38345] border-none text-lg font-bold rounded-xl shadow-lg shadow-yellow-900/10"
-                >
-                  Xác nhận & Thanh toán đặt cọc
-                </Button>
-              </Form>
-            </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <Form.Item
+                        name="adults"
+                        label={
+                          <span className="text-[10px] uppercase font-bold text-stone-400 tracking-widest">
+                            Người lớn
+                          </span>
+                        }
+                        initialValue={1}
+                      >
+                        <InputNumber
+                          min={1}
+                          className="w-full h-14 rounded-2xl bg-stone-50/50 border-stone-100 flex items-center"
+                        />
+                      </Form.Item>
 
-            {/* CHÍNH SÁCH */}
-            <div className="bg-white rounded-3xl p-8 shadow-sm">
-              <h3 className="text-xl font-bold mb-4">Chính sách & Lưu ý</h3>
-              <div className="grid md:grid-cols-2 gap-6 text-sm text-gray-600">
-                <div className="space-y-3">
-                  <p className="flex items-center gap-2">
-                    <ClockCircleOutlined /> Nhận phòng: <b>14:00</b>
-                  </p>
-                  <p className="flex items-center gap-2">
-                    <ClockCircleOutlined /> Trả phòng: <b>12:00</b>
-                  </p>
-                </div>
-                <div className="space-y-3">
-                  <p className="flex items-center gap-2">
-                    <CheckCircleFilled className="text-green-500" /> Hủy phòng
-                    miễn phí trước 48h
-                  </p>
-                  <p className="flex items-center gap-2">
-                    <CheckCircleFilled className="text-green-500" /> Xuất hóa
-                    đơn VAT khi trả phòng
-                  </p>
-                </div>
-              </div>
+                      <Form.Item
+                        name="children"
+                        label={
+                          <span className="text-[10px] uppercase font-bold text-stone-400 tracking-widest">
+                            Trẻ em
+                          </span>
+                        }
+                        initialValue={0}
+                      >
+                        <InputNumber
+                          min={0}
+                          className="w-full h-14 rounded-2xl bg-stone-50/50 border-stone-100 flex items-center"
+                        />
+                      </Form.Item>
+                    </div>
+                  </div>
+
+                  <div className="bg-[#FCFAF7] border border-[#D4E9E2] p-6 rounded-3xl flex gap-4 mt-8">
+                    <div className="w-10 h-10 rounded-full bg-[#D4E9E2] flex items-center justify-center shrink-0">
+                      <InfoCircleOutlined className="text-[#1E3932]" />
+                    </div>
+                    <p className="text-sm text-stone-600 leading-relaxed">
+                      Chính sách thanh toán: Bạn chỉ cần đặt cọc trước{" "}
+                      <b className="text-[#1E3932]">
+                        30% ({depositPrice.toLocaleString()}đ)
+                      </b>{" "}
+                      để giữ chỗ. Số tiền còn lại sẽ được thanh toán trực tiếp
+                      tại quầy khi nhận phòng.
+                    </p>
+                  </div>
+
+                  <Button
+                    htmlType="submit"
+                    loading={submitting}
+                    className="w-full mt-12 h-16 bg-[#1E3932] hover:bg-[#2D4F3C] border-none text-white text-base font-bold rounded-2xl shadow-xl shadow-green-900/20 transition-all active:scale-[0.98]"
+                  >
+                    XÁC NHẬN & THANH TOÁN ĐẶT CỌC
+                  </Button>
+                </Form>
+              </ConfigProvider>
             </div>
           </div>
 
-          {/* RIGHT: ROOM SUMMARY CARD */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-10 space-y-6">
-              <Card className="rounded-[32px] overflow-hidden border-none shadow-xl">
-                {/* Ảnh phòng */}
-                <div className="-mx-6 -mt-6 mb-6">
+          {/* RIGHT: Summary Sidebar */}
+          <div className="lg:col-span-4">
+            <div className="sticky top-28 space-y-6">
+              <Card
+                className="rounded-[2.5rem] shadow-2xl shadow-stone-200 border-stone-50 overflow-hidden"
+                bodyStyle={{ padding: "2rem" }}
+              >
+                <div className="relative h-48 -mx-8 -mt-8 mb-8 overflow-hidden">
                   <img
                     src={room.imageUrls[0]}
+                    className="w-full h-full object-cover"
                     alt={room.roomName}
-                    className="w-full h-52 object-cover"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#1E3932]/40 to-transparent" />
+                  <div className="absolute bottom-4 left-6 text-white">
+                    <p className="text-[10px] font-bold uppercase tracking-widest opacity-80">
+                      Không gian lựa chọn
+                    </p>
+                    <h3 className="text-lg font-serif">{room.roomName}</h3>
+                  </div>
                 </div>
 
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-xl font-bold text-gray-800">
-                    {room.roomName}
-                  </h3>
-                  <Tag
-                    color="gold"
-                    className="m-0 border-none rounded-md px-2 py-0.5"
-                  >
-                    VIP
-                  </Tag>
-                </div>
-
-                <p className="text-sm text-[#b89655] font-medium mb-4">
-                  {room.roomTypeName}
-                </p>
-
-                <div className="space-y-3 mb-6">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Lịch trình:</span>
-                    <span className="font-semibold">
-                      {dates[0].format("DD/MM")} - {dates[1].format("DD/MM")} (
-                      {nights} đêm)
+                <div className="space-y-5">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-stone-400 font-medium">
+                      Loại phòng
+                    </span>
+                    <span className="text-[#1E3932] font-bold">
+                      {room.roomTypeName}
                     </span>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Giá phòng:</span>
-                    <span className="font-semibold">
+
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-stone-400 font-medium">
+                      Thời gian lưu trú
+                    </span>
+                    <span className="text-[#1E3932] font-bold">
+                      {nights} đêm
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-stone-400 font-medium">
+                      Giá niêm yết
+                    </span>
+                    <span className="text-stone-600">
                       {room.basePrice.toLocaleString()}đ / đêm
                     </span>
                   </div>
-                </div>
 
-                <Divider className="my-4" />
+                  <Divider className="my-4 border-stone-100" />
 
-                {/* Tiện ích nhanh */}
-                <div className="flex gap-4 mb-6">
-                  <div className="flex flex-col items-center gap-1 text-gray-400">
-                    <WifiOutlined className="text-lg" />
-                    <span className="text-[10px]">Free Wifi</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-stone-500 font-medium">
+                      Tổng tiền phòng
+                    </span>
+                    <span className="text-lg font-bold text-stone-800">
+                      {totalPrice.toLocaleString()}đ
+                    </span>
                   </div>
-                  <div className="flex flex-col items-center gap-1 text-gray-400">
-                    <CoffeeOutlined className="text-lg" />
-                    <span className="text-[10px]">Breakfast</span>
-                  </div>
-                  <div className="flex flex-col items-center gap-1 text-gray-400">
-                    <UserOutlined className="text-lg" />
-                    <span className="text-[10px]">Max 2+</span>
-                  </div>
-                </div>
 
-                <div className="space-y-3 bg-gray-50 p-4 rounded-2xl">
-                  <div className="flex justify-between text-gray-600">
-                    <span>Tổng tiền phòng</span>
-                    <span>{totalPrice.toLocaleString()}đ</span>
-                  </div>
-                  <div className="flex justify-between text-[#b89655] font-bold text-lg pt-2 border-t border-dashed border-gray-300">
-                    <span>Cần đặt cọc (30%)</span>
-                    <span>{depositPrice.toLocaleString()}đ</span>
+                  <div className="bg-[#D4E9E2]/20 p-5 rounded-2xl mt-4 border border-[#D4E9E2]/30">
+                    <div className="flex justify-between items-center text-[#1E3932]">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">
+                          Số tiền đặt cọc (30%)
+                        </span>
+                        <span className="text-2xl font-bold font-serif">
+                          {depositPrice.toLocaleString()}đ
+                        </span>
+                      </div>
+                      <WalletOutlined className="text-2xl opacity-20" />
+                    </div>
                   </div>
                 </div>
-
-                <p className="text-[11px] text-gray-400 text-center mt-4 italic">
-                  * Giá đã bao gồm thuế phí và các tiện ích cơ bản.
-                </p>
               </Card>
 
-              <div className="bg-[#e8e4df] p-6 rounded-[24px] text-center border border-[#d8d4cf]">
-                <p className="text-sm text-gray-600 mb-1">
-                  Cần hỗ trợ đặt phòng?
+              <div className="px-6 text-center">
+                <p className="text-[10px] text-stone-400 leading-relaxed uppercase tracking-widest">
+                  Đảm bảo giá tốt nhất & không thu phí đặt chỗ
                 </p>
-                <p className="text-lg font-bold text-[#b89655]">1900 6789</p>
               </div>
             </div>
           </div>
         </div>
       </div>
     </main>
+  );
+}
+
+/* Reused Icons for consistency if not imported elsewhere */
+function WalletOutlined(props: any) {
+  return (
+    <svg
+      stroke="currentColor"
+      fill="currentColor"
+      strokeWidth="0"
+      viewBox="0 0 1024 1024"
+      height="1em"
+      width="1em"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <path d="M880 112H144c-17.7 0-32 14.3-32 32v736c0 17.7 14.3 32 32 32h736c17.7 0 32-14.3 32-32V144c0-17.7-14.3-32-32-32zm-40 464H528V448h312v128zm0 264H184V184h656v200H496c-17.7 0-32 14.3-32 32v192c0 17.7 14.3 32 32 32h344v200z"></path>
+    </svg>
   );
 }

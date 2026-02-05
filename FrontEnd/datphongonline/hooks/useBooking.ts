@@ -16,6 +16,7 @@ export function useBooking() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [bestSelling, setBestSelling] = useState<[]>([]);
 
   // Get all bookings for current user
   const getMyBooking = async () => {
@@ -155,6 +156,20 @@ export function useBooking() {
     }
   };
 
+  const getBestSellingBooking = async (top: number) => {
+    try {
+      setLoading(true);
+      const res = await BookingApi.getBestSellingRoom(top);
+      setBestSelling(res.data);
+      return res.data;
+    } catch (err) {
+      message.error("Lấy các phòng được đặt nhiều nhất thất bại");
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     bookings,
     rooms,
@@ -170,5 +185,6 @@ export function useBooking() {
     setConfirmBooking,
     setPendingBooking,
     setCancelBooking,
+    getBestSellingBooking,
   };
 }

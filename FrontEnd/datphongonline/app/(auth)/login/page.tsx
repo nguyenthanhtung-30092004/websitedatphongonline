@@ -5,6 +5,11 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { authApi } from "@/services/api/auth.api";
 import { useAuths } from "@/hooks/useAuths";
+import {
+  LockOutlined,
+  MailOutlined,
+  ArrowRightOutlined,
+} from "@ant-design/icons";
 
 const GoogleLogin = dynamic(
   () => import("@react-oauth/google").then((mod) => mod.GoogleLogin),
@@ -48,6 +53,7 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
   const handleGoogleLogin = async (credential: string) => {
     setError("");
     setGoogleLoading(true);
@@ -78,111 +84,145 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f5f3f0]">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] p-8">
-        <h1 className="text-2xl font-semibold text-[#1f1f1f] text-center mb-6 tracking-wide">
-          Đăng nhập
-        </h1>
+    <div className="min-h-screen relative flex items-center justify-center bg-[#FCFAF7] overflow-hidden">
+      {/* Decorative Organic Blobs */}
+      <div className="absolute -top-[10%] -right-[5%] w-96 h-96 bg-[#D4E9E2] rounded-full blur-[100px] opacity-40 animate-pulse" />
+      <div className="absolute -bottom-[10%] -left-[5%] w-[500px] h-[500px] bg-[#F1DEB4] rounded-full blur-[120px] opacity-30" />
 
-        {error && (
-          <div className="mb-4 rounded-lg bg-red-50 text-red-700 px-4 py-2 text-sm border border-red-200">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleLogin} className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-[#2c2c2c] mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="abc@gmail.com"
-              className="
-                w-full rounded-lg border border-gray-300 px-4 py-2
-                text-[#1f1f1f]
-                focus:outline-none
-                focus:ring-2 focus:ring-[#c8a46a]
-                focus:border-[#c8a46a]
-                transition
-              "
-            />
+      <div className="relative w-full max-w-md mx-4">
+        {/* Main Card */}
+        <div className="bg-white/80 backdrop-blur-xl rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(30,57,50,0.1)] border border-white p-10">
+          {/* Logo/Brand Header */}
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-[#1E3932] rounded-2xl mb-6 shadow-lg rotate-3">
+              <img
+                src="/logo-icon.png"
+                alt="Logo"
+                className="w-10 h-10 object-contain brightness-0 invert"
+              />
+            </div>
+            <h1 className="text-3xl font-serif text-[#1E3932] font-bold">
+              Chào mừng trở lại
+            </h1>
+            <p className="text-stone-500 mt-2 font-medium">
+              Đăng nhập để tiếp tục kỳ nghỉ của bạn
+            </p>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-[#2c2c2c] mb-1">
-              Mật khẩu
-            </label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="
-                w-full rounded-lg border border-gray-300 px-4 py-2
-                text-[#1f1f1f]
-                focus:outline-none
-                focus:ring-2 focus:ring-[#c8a46a]
-                focus:border-[#c8a46a]
-                transition
-              "
-            />
-          </div>
-          <div className="flex justify-end">
-            <a
-              href="/forgot-password"
-              className="text-sm text-[#b8955a] hover:underline"
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 rounded-2xl bg-rose-50 text-rose-700 px-5 py-3 text-sm border border-rose-100 flex items-center gap-3 animate-shake">
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleLogin} className="space-y-6">
+            {/* Email Field */}
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase font-bold text-stone-400 tracking-[0.2em] ml-2">
+                Địa chỉ Email
+              </label>
+              <div className="relative">
+                <MailOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300" />
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="abc@gmail.com"
+                  className="w-full bg-[#FCFAF7] rounded-2xl border border-stone-100 px-12 py-3.5 text-stone-800 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-[#1E3932]/10 focus:border-[#1E3932] transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Password Field */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center ml-2">
+                <label className="text-[10px] uppercase font-bold text-stone-400 tracking-[0.2em]">
+                  Mật khẩu
+                </label>
+                <a
+                  href="/forgot-password"
+                  className="text-[10px] uppercase font-bold text-[#C9A96A] hover:text-[#1E3932] transition-colors"
+                >
+                  Quên mật khẩu?
+                </a>
+              </div>
+              <div className="relative">
+                <LockOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300" />
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full bg-[#FCFAF7] rounded-2xl border border-stone-100 px-12 py-3.5 text-stone-800 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-[#1E3932]/10 focus:border-[#1E3932] transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="group w-full rounded-2xl bg-[#1E3932] hover:bg-[#2D4F3C] text-white py-4 font-bold tracking-widest shadow-xl shadow-green-900/10 transition-all duration-300 disabled:opacity-70 flex items-center justify-center gap-2"
             >
-              Quên mật khẩu?
-            </a>
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  ĐĂNG NHẬP{" "}
+                  <ArrowRightOutlined className="group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
+            </button>
+
+            {/* Divider */}
+            <div className="flex items-center gap-4 py-2">
+              <div className="flex-1 h-px bg-stone-100" />
+              <span className="text-[10px] font-bold text-stone-300 uppercase tracking-widest">
+                Hoặc tiếp tục với
+              </span>
+              <div className="flex-1 h-px bg-stone-100" />
+            </div>
+
+            {/* Google Login Wrapper */}
+            <div className="flex justify-center transition-opacity hover:opacity-90">
+              <GoogleLogin
+                onSuccess={(credentialResponse) => {
+                  if (credentialResponse.credential) {
+                    handleGoogleLogin(credentialResponse.credential);
+                  }
+                }}
+                onError={() => {
+                  setError("Đăng nhập Google thất bại");
+                }}
+                theme="outline"
+                shape="pill"
+                size="large"
+                width="100%"
+              />
+            </div>
+          </form>
+
+          {/* Footer Link */}
+          <div className="mt-10 text-center">
+            <p className="text-sm text-stone-500 font-medium">
+              Chưa có tài khoản?{" "}
+              <a
+                href="/register"
+                className="text-[#1E3932] font-bold hover:underline underline-offset-4"
+              >
+                Đăng ký thành viên ngay
+              </a>
+            </p>
           </div>
+        </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="
-              w-full rounded-lg
-              bg-gradient-to-r from-[#c8a46a] to-[#b8955a]
-              text-white py-2.5 font-semibold tracking-wide
-              hover:from-[#b8955a] hover:to-[#a8844d]
-              transition-all duration-300
-              disabled:opacity-60
-            "
-          >
-            {loading ? "Đang đăng nhập..." : "Đăng nhập"}
-          </button>
-          {/* GOOGLE LOGIN */}
-          <GoogleLogin
-            onSuccess={(credentialResponse) => {
-              if (credentialResponse.credential) {
-                handleGoogleLogin(credentialResponse.credential);
-              }
-            }}
-            onError={() => {
-              setError("Đăng nhập Google thất bại");
-            }}
-          />
-
-          {/* DIVIDER */}
-          <div className="flex items-center gap-3 my-5">
-            <div className="flex-1 h-px bg-gray-300" />
-            <span className="text-sm text-gray-500">hoặc</span>
-            <div className="flex-1 h-px bg-gray-300" />
-          </div>
-        </form>
-
-        <p className="mt-6 text-center text-sm text-gray-600">
-          Chưa có tài khoản?{" "}
-          <a
-            href="/register"
-            className="text-[#b8955a] font-medium hover:underline"
-          >
-            Đăng ký ngay
-          </a>
+        {/* Bottom Small Note */}
+        <p className="text-center mt-8 text-[10px] text-stone-400 font-bold uppercase tracking-widest">
+          © 2024 DatPhongOnline • Trải nghiệm an nhiên
         </p>
       </div>
     </div>

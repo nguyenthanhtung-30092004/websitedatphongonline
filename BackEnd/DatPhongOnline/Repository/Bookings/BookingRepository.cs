@@ -116,5 +116,38 @@ namespace DatPhongOnline.Repository.Bookings
 
             return await query.ToListAsync();
         }
+
+        public async Task<List<Room>> GetTopBookedRoomsAsync(int top)
+        {
+            return await _context.BookingDetails
+                .AsNoTracking()
+                .Where(bd => bd.Booking.Status == BookingStatus.Confirmed || bd.Booking.Status == BookingStatus.Completed)
+                .GroupBy(bd => bd.RoomId)
+                .OrderByDescending(g => g.Count())
+                .Select(g => g.Key)
+                .Take(top)
+                .Join(_context.Rooms
+                .Include(r => r.RoomImages)
+                .Include(r => r.RoomAmenities)
+                .ThenInclude(ra => ra.Amenity),
+                roomId => roomId,
+                room => room.Id,
+                (roomId, room) => room
+
+                ).ToListAsync();
+        }
+
+        public async Task<List<Booking>> GetBookingsInRangeAsync(DateTime start, DateTime end)
+        {
+            return await _context.Bookings
+                .Include(b => b.BookingDetails)
+                .Where(b =>
+                    b.CheckInDate <= end && // Đổi < thành <=
+                    b.CheckOutDate >= start && // Đổi > thành >=
+                    (int)b.Status != 3 // Không lấy Cancel
+                )
+                .ToListAsync();
+        }
+
     }
 }

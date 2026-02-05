@@ -1,138 +1,68 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useAmenity } from "@/hooks/useAmenity";
-import { useRoom } from "@/hooks/useRoom";
-import * as AntdIcons from "@ant-design/icons";
-import Link from "next/link";
+import { useBooking } from "@/hooks/useBooking";
+import { Room } from "@/types/room";
+import RoomCard from "./RoomCard";
 
 export default function FeaturedRooms() {
-  const { rooms } = useRoom();
   const { amenities } = useAmenity();
+  const { getBestSellingBooking, loading } = useBooking();
+  const [rooms, setRooms] = useState<Room[]>([]);
+
+  useEffect(() => {
+    const fetchBestSelling = async () => {
+      try {
+        const data = await getBestSellingBooking(6);
+        setRooms(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchBestSelling();
+  }, []);
 
   return (
-    <section className="bg-[#fafafa] py-20">
-      <div className="max-w-7xl mx-auto px-6">
-        {/* HEADER */}
-        <div className="mb-12">
-          <h2 className="text-3xl font-semibold text-gray-900">
-            Phòng nổi bật
-          </h2>
-          <p className="text-gray-500 mt-2 text-sm">
-            Những lựa chọn được khách hàng yêu thích nhất
+    <section className="bg-white py-24 relative overflow-hidden">
+      {/* Background Decor */}
+      <div className="absolute top-40 -right-20 w-80 h-80 bg-[#D4E9E2] rounded-full blur-[120px] opacity-30" />
+
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+          <div className="space-y-4">
+            <h2 className="text-4xl font-serif text-[#1E3932]">
+              Những căn phòng <br />{" "}
+              <span className="text-[#C9A96A]">tuyệt vời nhất</span>
+            </h2>
+            <div className="w-20 h-1 bg-[#C9A96A] rounded-full" />
+          </div>
+          <p className="text-stone-500 max-w-sm text-sm leading-relaxed">
+            Được tuyển chọn kỹ lưỡng dựa trên đánh giá của hàng ngàn khách hàng
+            đã trải nghiệm dịch vụ.
           </p>
         </div>
 
-        {/* GRID */}
-        <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-8">
-          {rooms.map((room) => (
-            <Link
-              href={`/room-detail/${room.id}`}
-              key={room.id}
-              className="
-                group
-                bg-white
-                rounded-2xl
-                overflow-hidden
-                shadow-md
-                hover:shadow-xl
-                transition-all duration-300
-                flex flex-col
-              "
-            >
-              {/* IMAGE */}
-              <div className="relative h-48 overflow-hidden">
-                <img
-                  src={room.imageUrls[0]}
-                  alt={room.roomName}
-                  className="
-                    w-full h-full object-cover
-                    group-hover:scale-105
-                    transition-transform duration-500
-                  "
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-              </div>
-
-              {/* CONTENT */}
-              <div className="p-5 flex flex-col flex-1">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {room.roomName}
-                </h3>
-                <p className="text-xs text-gray-500 mt-1">{room.address}</p>
-
-                {/* AMENITIES */}
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {room.amenities.slice(0, 3).map((ameName) => {
-                    const amenity = amenities.find((a) => a.name === ameName);
-                    if (!amenity) return null;
-
-                    const Icon = (AntdIcons as any)[amenity.icon];
-
-                    return (
-                      <div
-                        key={amenity.id}
-                        className="
-                          flex items-center gap-2
-                          px-2.5 py-1
-                          rounded-full
-                          bg-gray-50
-                          border border-gray-200
-                          text-gray-700
-                          text-xs
-                        "
-                      >
-                        {Icon && (
-                          <span
-                            className="
-                              w-6 h-6
-                              flex items-center justify-center
-                              rounded-full
-                              bg-gradient-to-br from-[#c9a96a] to-[#9f7c3f]
-                              text-white
-                            "
-                          >
-                            <Icon className="text-xs" />
-                          </span>
-                        )}
-                        <span>{amenity.name}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* PRICE + CTA */}
-                <div className="flex justify-between items-end mt-auto pt-5">
-                  <div>
-                    <span className="text-[10px] uppercase tracking-wide text-gray-400">
-                      Giá từ
-                    </span>
-                    <div className="text-xl font-semibold text-gray-900">
-                      {room.basePrice.toLocaleString()}đ
-                      <span className="text-sm font-normal text-gray-400">
-                        {" "}
-                        / đêm
-                      </span>
-                    </div>
-                  </div>
-
-                  <button
-                    className="
-                      px-5 py-2.5
-                      rounded-full
-                      text-xs font-medium
-                      text-white
-                      bg-gray-900
-                      hover:bg-[#c9a96a]
-                      transition-all duration-300 hover:cursor-pointer
-                    "
-                  >
-                    Đặt phòng
-                  </button>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-96 rounded-[2rem] bg-stone-50 animate-pulse"
+              />
+            ))}
+          </div>
+        ) : rooms.length === 0 ? (
+          <div className="text-center py-20 bg-stone-50 rounded-[2rem] text-stone-400 italic">
+            Chưa có dữ liệu phòng nổi bật
+          </div>
+        ) : (
+          <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-10">
+            {rooms.map((room) => (
+              <RoomCard key={room.id} room={room} amenities={amenities} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

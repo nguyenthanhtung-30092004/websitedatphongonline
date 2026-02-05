@@ -1,4 +1,5 @@
 ﻿using CloudinaryDotNet.Actions;
+using DatPhongOnline.Dtos.Booking;
 using DatPhongOnline.Dtos.Room;
 using DatPhongOnline.Services.RoomSerive;
 using Microsoft.AspNetCore.Authorization;
@@ -52,5 +53,7 @@ namespace DatPhongOnline.Controllers.Room
             await _service.DeleteAsync(id);
             return Ok("Deleted Successfull!");
         }
+
+
     }
 }

@@ -11,7 +11,6 @@ export default function HomePage() {
     <>
       <Navbar />
       <Hero />
-      {/* <RoomTypeSection /> */}
       <FeaturedRooms />
       <AmenitiesSection />
       <CTASection />

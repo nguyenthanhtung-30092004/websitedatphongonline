@@ -101,5 +101,13 @@ namespace DatPhongOnline.Controllers.Booking
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+
+        [HttpGet("bestselling")]
+        public async Task<IActionResult> GetBestSellingRooms([FromQuery] int top = 6)
+        {
+            var rooms = await _service.GetTopBookedRoomAsync(top);
+            return Ok(rooms);
+        }
     }
 }

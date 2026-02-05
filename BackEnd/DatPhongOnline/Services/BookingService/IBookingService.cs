@@ -14,6 +14,8 @@ namespace DatPhongOnline.Services.BookingService
         Task<List<BookingDto>> GetUserBookingsAsync(int userId);
 
         Task<List<RoomDto>> SearchRoomsAsync(SearchRoomDto dto);
+        Task<List<RoomDto>> GetTopBookedRoomAsync(int top);
+        Task<List<RoomMatrixDto>> GetRoomMatrixAsync(DateTime startDate, DateTime endDate);
     }
 
 }
