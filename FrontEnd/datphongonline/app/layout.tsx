@@ -1,5 +1,6 @@
 import "./globals.css";
 import Providers from "./providers";
+import { ChatWidget } from "@/components/chat/ChatWidget";
 
 export default function RootLayout({
   children,
@@ -9,7 +10,10 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body className="bg-slate-50 text-gray-900">
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <ChatWidget />
+        </Providers>
       </body>
     </html>
   );

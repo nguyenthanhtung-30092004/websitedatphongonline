@@ -18,53 +18,39 @@ namespace DatPhongOnline.Services.AI
 
         public async Task<ParsedChatResult?> ParseIntentAsync(string userMessage)
         {
+            var today = DateTime.Now;
+            var apiKey = _config["Gemini:ApiKey"];
+            var baseUrl = _config["Gemini:Url"];
+            var url = $"{baseUrl}?key={apiKey}";
             string prompt = $@"
-Bạn là AI phân tích câu hỏi đặt phòng khách sạn.
-
-INTENT HỢP LỆ (CHỈ CHỌN 1):
-- list_room (đưa ra, liệt kê, xem các phòng)
-- check_availability (hỏi còn phòng, kiểm tra ngày)
-- ask_room_info (hỏi mô tả, giá, tư vấn)
-- greeting
-- other
-
-QUY TẮC:
-- Nếu người dùng yêu cầu xem / liệt kê phòng → intent = list_room
-- Không được suy đoán
-
-CÂU NGƯỜI DÙNG:
-""{userMessage}""
-
-CHỈ TRẢ VỀ JSON:
-
+Hôm nay là: {today:yyyy-MM-dd} (Thứ {today.DayOfWeek}).
+NHIỆM VỤ: Phân tích ý định và ngày tháng từ câu hỏi của khách.
+QUY TẮC NGÀY THÁNG:
+1. ""Ngày 15"", ""15/10"" -> CheckIn = Năm nay-10-15.
+2. NẾU CHỈ CÓ NGÀY ĐẾN (thiếu ngày đi) -> TỰ ĐỘNG CỘNG THÊM 1 NGÀY làm ngày CheckOut.
+3. ""Ngày mai"" -> CheckIn = {today.AddDays(1):yyyy-MM-dd}, CheckOut = {today.AddDays(2):yyyy-MM-dd}.
+CÂU HỎI: ""{userMessage}""
+TRẢ VỀ JSON:
 {{
-  ""intent"": ""list_room | check_availability | ask_room_info | greeting | other"",
-  ""checkIn"": ""YYYY-MM-DD hoặc null"",
-  ""checkOut"": ""YYYY-MM-DD hoặc null""
+  ""intent"": ""check_availability (nếu có ngày) | list_room (hỏi danh sách/tiện ích) | other"",
+  ""checkIn"": ""YYYY-MM-DD"" (null nếu ko có),
+  ""checkOut"": ""YYYY-MM-DD"" (null nếu ko có)
 }}
 ";
 
-
             var body = new
             {
-                model = _config["Groq:Model"],
-                temperature = 0,
-                messages = new[]
+                contents = new[]
                 {
-                    new { role = "system", content = "Bạn là bộ phân tích tiếng Việt, không được suy đoán." },
-                    new { role = "user", content = prompt }
+            new { parts = new[] { new { text = prompt } } }
+        },
+                generationConfig = new
+                {
+                    response_mime_type = "application/json"
                 }
             };
 
-            var req = new HttpRequestMessage(
-                HttpMethod.Post,
-                "https://api.groq.com/openai/v1/chat/completions"
-            );
-
-            req.Headers.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue(
-                    "Bearer", _config["Groq:ApiKey"]);
-
+            var req = new HttpRequestMessage(HttpMethod.Post, url);
             req.Content = new StringContent(
                 JsonConvert.SerializeObject(body),
                 Encoding.UTF8,
@@ -73,14 +59,30 @@ CHỈ TRẢ VỀ JSON:
             var res = await _http.SendAsync(req);
             var text = await res.Content.ReadAsStringAsync();
 
-            if (!res.IsSuccessStatusCode) return null;
+            dynamic json = JsonConvert.DeserializeObject(text)!;
 
-            var raw = JObject.Parse(text)
-                ["choices"]![0]!["message"]!["content"]!.ToString();
+            if (json.error != null)
+            {
+                // Ghi log lỗi nếu cần, ở đây trả về null để fallback
+                Console.WriteLine($"Gemini Error: {json.error.message}");
+                return null;
+            }
 
-            var clean = raw.Replace("```json", "").Replace("```", "").Trim();
+            if (json.candidates == null) return null;
 
-            return JsonConvert.DeserializeObject<ParsedChatResult>(clean);
+            string clean = json.candidates[0].content.parts[0].text;
+            clean = clean.Replace("```json", "").Replace("```", "").Trim();
+
+            try
+            {
+                return JsonConvert.DeserializeObject<ParsedChatResult>(clean);
+            }
+            catch
+            {
+                return null;
+            }
         }
+
+
     }
 }
