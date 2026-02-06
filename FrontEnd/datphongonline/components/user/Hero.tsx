@@ -37,7 +37,7 @@ export default function Hero() {
 
           {/* Image with Organic Frame */}
           <div className="relative">
-            <div className="relative z-10 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-green-900/10 rotate-2 hover:rotate-0 transition-transform duration-700">
+            <div className="relative z-10 h-[420px] md:h-[520px] rounded-[2.5rem] overflow-hidden shadow-2xl shadow-green-900/10 rotate-2 hover:rotate-0 transition-transform duration-700">
               <Image
                 src="/banner.png"
                 alt="Luxury Room"
@@ -46,10 +46,12 @@ export default function Hero() {
                 priority
               />
             </div>
-            {/* Organic Shape Decor */}
+
+            {/* Decor */}
             <div className="absolute -top-6 -right-6 w-32 h-32 bg-[#D4E9E2] rounded-full -z-10" />
             <div className="absolute -bottom-6 -left-6 w-48 h-48 border-2 border-[#C9A96A]/30 rounded-[3rem] -z-10" />
           </div>
+
         </div>
       </div>
 

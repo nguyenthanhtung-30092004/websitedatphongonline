@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { message } from "antd";
-import { BookingApi } from "@/services/api/booking.api";
+import { bookingApi } from "@/services/api/booking.api";
 import {
   BookingRequest,
   SearchRoomRequest,
@@ -23,7 +23,7 @@ export function useBooking() {
     if (submitting) return;
 
     try {
-      const res = await BookingApi.getMyBookings();
+      const res = await bookingApi.getMyBookings();
       return res.data;
     } catch (err: any) {
       message.error(err?.response?.data?.message || "Lỗi lấy booking");
@@ -34,7 +34,7 @@ export function useBooking() {
   // Get booking by ID
   const getBookingById = async (bookingId: number) => {
     try {
-      const res = await BookingApi.getBookingById(bookingId);
+      const res = await bookingApi.getBookingById(bookingId);
       return res.data;
     } catch (err: any) {
       message.error(err?.response?.data?.message || "Lỗi lấy chi tiết booking");
@@ -48,7 +48,7 @@ export function useBooking() {
 
     setSubmitting(true);
     try {
-      const res = await BookingApi.createBooking(data);
+      const res = await bookingApi.createBooking(data);
       message.success("Đặt phòng thành công 🎉");
       return res.data;
     } catch (err: any) {
@@ -64,7 +64,7 @@ export function useBooking() {
   // Cancel a booking
   const cancelBooking = async (bookingId: number) => {
     try {
-      await BookingApi.cancelBooking(bookingId);
+      await bookingApi.cancelBooking(bookingId);
       message.success("Hủy đặt phòng thành công");
     } catch (err: any) {
       message.error(err?.response?.data?.message || "Lỗi hủy đặt phòng");
@@ -78,7 +78,7 @@ export function useBooking() {
 
     setLoading(true);
     try {
-      const res = await BookingApi.searchRooms(data);
+      const res = await bookingApi.searchRooms(data);
       setRooms(res.data);
       message.success("Tìm phòng thành công");
       return res.data;
@@ -93,7 +93,7 @@ export function useBooking() {
   const fetchBooking = async (): Promise<BookingResponse[]> => {
     try {
       setLoading(true);
-      const res = await BookingApi.getAllBooking();
+      const res = await bookingApi.getAllBooking();
       setBooking(res.data);
       return res.data;
     } catch (err) {
@@ -106,7 +106,7 @@ export function useBooking() {
   const setConfirmBooking = async (id: number) => {
     try {
       setLoading(true);
-      const res = await BookingApi.setConfirmBooking(id);
+      const res = await bookingApi.setConfirmBooking(id);
       setBooking(res.data);
       return res.data;
     } catch (err) {
@@ -119,7 +119,7 @@ export function useBooking() {
   const setCompleteBooking = async (id: number) => {
     try {
       setLoading(true);
-      const res = await BookingApi.setCompleteBooking(id);
+      const res = await bookingApi.setCompleteBooking(id);
       setBooking(res.data);
       return res.data;
     } catch (err) {
@@ -132,7 +132,7 @@ export function useBooking() {
   const setPendingBooking = async (id: number) => {
     try {
       setLoading(true);
-      const res = await BookingApi.setPendingBooking(id);
+      const res = await bookingApi.setPendingBooking(id);
       setBooking(res.data);
       return res.data;
     } catch (err) {
@@ -145,7 +145,7 @@ export function useBooking() {
   const setCancelBooking = async (id: number) => {
     try {
       setLoading(true);
-      const res = await BookingApi.setCancelBooking(id);
+      const res = await bookingApi.setCancelBooking(id);
       setBooking(res.data);
       return res.data;
     } catch (err) {
@@ -159,7 +159,7 @@ export function useBooking() {
   const getBestSellingBooking = async (top: number) => {
     try {
       setLoading(true);
-      const res = await BookingApi.getBestSellingRoom(top);
+      const res = await bookingApi.getBestSellingRoom(top);
       setBestSelling(res.data);
       return res.data;
     } catch (err) {

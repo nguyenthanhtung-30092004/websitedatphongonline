@@ -14,7 +14,7 @@ import {
   DoubleRightOutlined,
   DoubleLeftOutlined,
 } from "@ant-design/icons";
-import { BookingApi } from "@/services/api/booking.api";
+import { bookingApi } from "@/services/api/booking.api";
 
 const DAYS_COUNT = 7;
 
@@ -29,7 +29,7 @@ export default function RoomMatrixPage() {
   const fetchMatrix = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await BookingApi.getRoomMatrix(startDate, endDate);
+      const res = await bookingApi.getRoomMatrix(startDate, endDate);
       setRooms(res.data);
     } catch {
       message.error("Không tải được sơ đồ phòng");
@@ -167,9 +167,8 @@ export default function RoomMatrixPage() {
                         className="sticky top-0 z-20 bg-gray-800 text-center min-w-[100px] p-2 border-l border-gray-700"
                       >
                         <div
-                          className={`rounded px-1.5 py-1 inline-block ${
-                            isToday ? "bg-blue-500 text-white" : "text-gray-300"
-                          }`}
+                          className={`rounded px-1.5 py-1 inline-block ${isToday ? "bg-blue-500 text-white" : "text-gray-300"
+                            }`}
                         >
                           <div className="text-[10px] uppercase">
                             {dayjs(d).format("ddd")}

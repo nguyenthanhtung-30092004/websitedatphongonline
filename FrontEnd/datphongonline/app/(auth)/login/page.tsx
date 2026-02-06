@@ -3,6 +3,8 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
 import { authApi } from "@/services/api/auth.api";
 import { useAuths } from "@/hooks/useAuths";
 import {
@@ -10,6 +12,8 @@ import {
   MailOutlined,
   ArrowRightOutlined,
 } from "@ant-design/icons";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
 
 const GoogleLogin = dynamic(
   () => import("@react-oauth/google").then((mod) => mod.GoogleLogin),
@@ -94,11 +98,13 @@ export default function LoginPage() {
         <div className="bg-white/80 backdrop-blur-xl rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(30,57,50,0.1)] border border-white p-10">
           {/* Logo/Brand Header */}
           <div className="text-center mb-10">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-[#1E3932] rounded-2xl mb-6 shadow-lg rotate-3">
-              <img
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-[#1E3932] rounded-2xl mb-6 shadow-lg rotate-3 relative overflow-hidden">
+              <Image
                 src="/logo-icon.png"
+                fill
                 alt="Logo"
-                className="w-10 h-10 object-contain brightness-0 invert"
+                className="object-contain p-2 brightness-0 invert"
+                sizes="64px"
               />
             </div>
             <h1 className="text-3xl font-serif text-[#1E3932] font-bold">
@@ -118,65 +124,41 @@ export default function LoginPage() {
           )}
 
           <form onSubmit={handleLogin} className="space-y-6">
-            {/* Email Field */}
-            <div className="space-y-2">
-              <label className="text-[10px] uppercase font-bold text-stone-400 tracking-[0.2em] ml-2">
-                Địa chỉ Email
-              </label>
-              <div className="relative">
-                <MailOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300" />
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="abc@gmail.com"
-                  className="w-full bg-[#FCFAF7] rounded-2xl border border-stone-100 px-12 py-3.5 text-stone-800 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-[#1E3932]/10 focus:border-[#1E3932] transition-all"
-                />
-              </div>
-            </div>
+            <Input
+              label="Địa chỉ Email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="abc@gmail.com"
+              icon={<MailOutlined />}
+            />
 
-            {/* Password Field */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center ml-2">
-                <label className="text-[10px] uppercase font-bold text-stone-400 tracking-[0.2em]">
-                  Mật khẩu
-                </label>
-                <a
+            <Input
+              label="Mật khẩu"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              icon={<LockOutlined />}
+              rightElement={
+                <Link
                   href="/forgot-password"
                   className="text-[10px] uppercase font-bold text-[#C9A96A] hover:text-[#1E3932] transition-colors"
                 >
                   Quên mật khẩu?
-                </a>
-              </div>
-              <div className="relative">
-                <LockOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300" />
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full bg-[#FCFAF7] rounded-2xl border border-stone-100 px-12 py-3.5 text-stone-800 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-[#1E3932]/10 focus:border-[#1E3932] transition-all"
-                />
-              </div>
-            </div>
+                </Link>
+              }
+            />
 
-            {/* Submit Button */}
-            <button
+            <Button
               type="submit"
-              disabled={loading}
-              className="group w-full rounded-2xl bg-[#1E3932] hover:bg-[#2D4F3C] text-white py-4 font-bold tracking-widest shadow-xl shadow-green-900/10 transition-all duration-300 disabled:opacity-70 flex items-center justify-center gap-2"
+              loading={loading}
+              icon={<ArrowRightOutlined />}
             >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <>
-                  ĐĂNG NHẬP{" "}
-                  <ArrowRightOutlined className="group-hover:translate-x-1 transition-transform" />
-                </>
-              )}
-            </button>
+              ĐĂNG NHẬP
+            </Button>
 
             {/* Divider */}
             <div className="flex items-center gap-4 py-2">
@@ -210,12 +192,12 @@ export default function LoginPage() {
           <div className="mt-10 text-center">
             <p className="text-sm text-stone-500 font-medium">
               Chưa có tài khoản?{" "}
-              <a
+              <Link
                 href="/register"
                 className="text-[#1E3932] font-bold hover:underline underline-offset-4"
               >
                 Đăng ký thành viên ngay
-              </a>
+              </Link>
             </p>
           </div>
         </div>

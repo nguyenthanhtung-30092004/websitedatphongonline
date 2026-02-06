@@ -7,7 +7,7 @@ import {
 import { Room } from "@/types/room";
 import api from "./axios";
 
-export const BookingApi = {
+export const bookingApi = {
   // Create a new booking
   createBooking: (data: BookingRequest) =>
     api.post<BookingResponse>("/api/booking", data),

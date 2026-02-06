@@ -17,46 +17,11 @@ import {
 } from "@ant-design/icons";
 import { Modal, Tooltip, Avatar } from "antd";
 import { useAuths } from "@/hooks/useAuths";
+import { ADMIN_MENU_ITEMS } from "@/constants/admin-navigation";
 
 const { confirm } = Modal;
 
-const menu = [
-  {
-    label: "Dashboard",
-    href: "/admin/dashboard",
-    icon: <HomeOutlined />,
-  },
-  {
-    label: "Quản lý loại phòng",
-    href: "/admin/room-types",
-    icon: <AppstoreOutlined />,
-  },
-  {
-    label: "Quản lý tiện ích",
-    href: "/admin/amenities",
-    icon: <ToolOutlined />,
-  },
-  {
-    label: "Quản lý phòng",
-    href: "/admin/rooms",
-    icon: <HomeOutlined />,
-  },
-  {
-    label: "Quản lý đơn hàng",
-    href: "/admin/bookings",
-    icon: <CalendarOutlined />,
-  },
-  {
-    label: "Quản lý người dùng",
-    href: "/admin/users",
-    icon: <UserOutlined />,
-  },
-  {
-    label: "Room-Matrix",
-    href: "/admin/room-matrix",
-    icon: <UserOutlined />,
-  },
-];
+const menu = ADMIN_MENU_ITEMS;
 
 export default function AdminLayout({
   children,
@@ -120,11 +85,10 @@ export default function AdminLayout({
                     flex items-center gap-3
                     px-4 py-3 rounded-lg
                     transition
-                    ${
-                      active
-                        ? "bg-yellow-50 text-[#b8955a] font-semibold border-l-4 border-[#b8955a]"
-                        : "text-gray-600 hover:bg-gray-50"
-                    }
+                    ${active
+                    ? "bg-yellow-50 text-[#b8955a] font-semibold border-l-4 border-[#b8955a]"
+                    : "text-gray-600 hover:bg-gray-50"
+                  }
                     ${collapsed ? "justify-center pl-4" : ""}
                   `}
               >

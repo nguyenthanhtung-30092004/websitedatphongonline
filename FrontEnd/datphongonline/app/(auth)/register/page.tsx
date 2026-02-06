@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import api from "@/services/api/axios";
 import {
   UserOutlined,
@@ -11,6 +12,8 @@ import {
   ArrowRightOutlined,
   SafetyCertificateOutlined,
 } from "@ant-design/icons";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -90,103 +93,66 @@ export default function RegisterPage() {
 
           <form onSubmit={handleRegister} className="space-y-6">
             <div className="grid grid-cols-1 gap-6">
-              {/* Full Name */}
-              <div className="space-y-2">
-                <label className="text-[10px] uppercase font-bold text-stone-400 tracking-[0.2em] ml-2">
-                  Họ và tên
-                </label>
-                <div className="relative">
-                  <UserOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300" />
-                  <input
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    required
-                    placeholder="Nguyễn Văn A"
-                    className="w-full bg-[#FCFAF7] rounded-2xl border border-stone-100 px-12 py-3.5 text-stone-800 placeholder:text-stone-300 focus:outline-none focus:ring-4 focus:ring-[#1E3932]/5 focus:border-[#1E3932] transition-all"
-                  />
-                </div>
-              </div>
+              <Input
+                label="Họ và tên"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+                placeholder="Nguyễn Văn A"
+                icon={<UserOutlined />}
+              />
 
-              {/* Email */}
-              <div className="space-y-2">
-                <label className="text-[10px] uppercase font-bold text-stone-400 tracking-[0.2em] ml-2">
-                  Email liên hệ
-                </label>
-                <div className="relative">
-                  <MailOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    placeholder="abc@gmail.com"
-                    className="w-full bg-[#FCFAF7] rounded-2xl border border-stone-100 px-12 py-3.5 text-stone-800 placeholder:text-stone-300 focus:outline-none focus:ring-4 focus:ring-[#1E3932]/5 focus:border-[#1E3932] transition-all"
-                  />
-                </div>
-              </div>
+              <Input
+                label="Email liên hệ"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="abc@gmail.com"
+                icon={<MailOutlined />}
+              />
 
-              {/* Password */}
-              <div className="space-y-2">
-                <label className="text-[10px] uppercase font-bold text-stone-400 tracking-[0.2em] ml-2">
-                  Mật khẩu bảo mật
-                </label>
-                <div className="relative">
-                  <LockOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300" />
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={6}
-                    placeholder="••••••••"
-                    className="w-full bg-[#FCFAF7] rounded-2xl border border-stone-100 px-12 py-3.5 text-stone-800 placeholder:text-stone-300 focus:outline-none focus:ring-4 focus:ring-[#1E3932]/5 focus:border-[#1E3932] transition-all"
-                  />
-                </div>
-              </div>
+              <Input
+                label="Mật khẩu bảo mật"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                placeholder="••••••••"
+                icon={<LockOutlined />}
+              />
 
-              {/* Phone */}
-              <div className="space-y-2">
-                <label className="text-[10px] uppercase font-bold text-stone-400 tracking-[0.2em] ml-2">
-                  Số điện thoại
-                </label>
-                <div className="relative">
-                  <PhoneOutlined className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300" />
-                  <input
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    required
-                    placeholder="0876423445"
-                    className="w-full bg-[#FCFAF7] rounded-2xl border border-stone-100 px-12 py-3.5 text-stone-800 placeholder:text-stone-300 focus:outline-none focus:ring-4 focus:ring-[#1E3932]/5 focus:border-[#1E3932] transition-all"
-                  />
-                </div>
-              </div>
+              <Input
+                label="Số điện thoại"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+                placeholder="0876423445"
+                icon={<PhoneOutlined />}
+              />
             </div>
 
-            <button
-              disabled={loading}
-              className="group w-full rounded-2xl bg-[#1E3932] hover:bg-[#2D4F3C] text-white py-4 font-bold tracking-widest shadow-xl shadow-green-900/10 transition-all duration-300 disabled:opacity-70 flex items-center justify-center gap-2 mt-4 active:scale-95"
+            <Button
+              type="submit"
+              loading={loading}
+              icon={<ArrowRightOutlined />}
+              className="mt-4 active:scale-95"
             >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <>
-                  ĐĂNG KÝ NGAY{" "}
-                  <ArrowRightOutlined className="group-hover:translate-x-1 transition-transform" />
-                </>
-              )}
-            </button>
+              ĐĂNG KÝ NGAY
+            </Button>
           </form>
 
           {/* Footer */}
           <div className="mt-10 text-center">
             <p className="text-sm text-stone-500 font-medium">
               Đã có tài khoản?{" "}
-              <a
+              <Link
                 href="/login"
                 className="text-[#1E3932] font-bold hover:underline underline-offset-4 decoration-[#C9A96A] decoration-2 transition-all"
               >
                 Đăng nhập ngay
-              </a>
+              </Link>
             </p>
           </div>
         </div>
